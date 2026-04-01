@@ -46,6 +46,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Seed data (generated from Deezer API)
+seed-data.json
+
 # Runtime data
 pids
 *.pid
