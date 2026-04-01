@@ -4,10 +4,10 @@
 
 Lock down the project foundation before any implementation begins.
 
-- [ ] Finalize project title
-- [ ] Finalize scope document
-- [ ] Set up monorepo structure
-- [ ] Choose data model and define schema
+- [x] Finalize project title
+- [x] Finalize scope document
+- [x] Set up monorepo structure
+- [x] Choose data model and define schema
 
 ---
 
@@ -15,10 +15,10 @@ Lock down the project foundation before any implementation begins.
 
 Prepare the song dataset and implement the database layer.
 
-- [ ] Curate a dataset of ~500 songs with metadata (title, artist, album, genre, duration, preview URL, cover URL)
-- [ ] Write a seed script to populate the database
-- [ ] Define all tables using Drizzle ORM schema definitions
-- [ ] Run initial migrations and verify data integrity
+- [x] Curate a dataset of ~500 songs with metadata (title, artist, album, genre, duration, preview URL, cover URL)
+- [x] Write a seed script to populate the database
+- [x] Define all tables using Drizzle ORM schema definitions
+- [x] Run initial migrations and verify data integrity
 
 ---
 
@@ -26,13 +26,14 @@ Prepare the song dataset and implement the database layer.
 
 Build the NestJS backend with all essential API routes.
 
-- [ ] Initialize NestJS application structure (modules, controllers, services)
+- [x] Initialize NestJS application structure (modules, controllers, services)
+- [ ] Set up Swagger API documentation
 - [ ] Implement user authentication (register, login, JWT tokens)
+- [ ] Implement users endpoints (GET /users/me, PUT /users/preferences)
 - [ ] Implement songs endpoints (list, search, detail)
 - [ ] Implement interactions endpoint (record play, skip, like, dislike, save)
 - [ ] Implement favorites route (derived from `interactions` where `event_type = 'save'`)
 - [ ] Implement history route (derived from `interactions` where `event_type = 'play'`)
-- [ ] Set up Swagger API documentation
 
 ---
 
@@ -41,6 +42,7 @@ Build the NestJS backend with all essential API routes.
 Build the React Native / Expo mobile application with all core screens.
 
 - [ ] Initialize Expo project with Expo Router
+- [ ] Set up API client with JWT interceptor (axios/fetch wrapper, token attach, 401 handling)
 - [ ] Implement authentication flow (register, login, token storage)
 - [ ] Implement onboarding screen (genre selection)
 - [ ] Implement home screen (song feed / recommendations)
@@ -72,6 +74,16 @@ Implement the three recommendation algorithms in Python.
 - [ ] **Content-based** — recommend songs similar to user's liked songs (using song metadata features)
 - [ ] **Collaborative filtering** — recommend songs based on similar users' interaction patterns
 - [ ] Expose recommendation results via a backend API endpoint
+
+---
+
+## Phase 6.5 — Synthetic Interaction Data
+
+Generate synthetic user interactions so the recommendation algorithms and evaluation have sufficient data to work with.
+
+- [ ] Write a script to create synthetic users with varied genre preferences
+- [ ] Generate realistic interaction patterns (plays, likes, skips, saves) across the song catalog
+- [ ] Verify data volume is sufficient for collaborative filtering and evaluation metrics
 
 ---
 

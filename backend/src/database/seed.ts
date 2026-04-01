@@ -32,7 +32,7 @@ interface DeezerTrack {
 }
 
 interface DeezerSearchResponse {
-  data: DeezerTrack[];
+  data?: DeezerTrack[];
   total: number;
 }
 
@@ -100,7 +100,9 @@ async function fetchAllSongs(): Promise<SeedSong[]> {
     await new Promise((resolve) => setTimeout(resolve, 300));
   }
 
-  console.log(`Fetched ${allSongs.length} unique songs across ${GENRES.length} genres`);
+  console.log(
+    `Fetched ${allSongs.length} unique songs across ${GENRES.length} genres`,
+  );
   return allSongs;
 }
 
@@ -158,7 +160,9 @@ async function seed(): Promise<void> {
       .onConflictDoNothing({ target: songs.deezerId });
 
     inserted += batch.length;
-    console.log(`  Inserted batch ${Math.ceil((i + 1) / BATCH_SIZE)} (${inserted}/${seedSongs.length})`);
+    console.log(
+      `  Inserted batch ${Math.ceil((i + 1) / BATCH_SIZE)} (${inserted}/${seedSongs.length})`,
+    );
   }
 
   console.log('Seed complete!');

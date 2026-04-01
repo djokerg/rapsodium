@@ -103,6 +103,7 @@ Stores basic information about songs displayed in the application and used by th
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Unique song identifier |
+| `deezer_id` | `BIGINT` | `NOT NULL, UNIQUE INDEX` | External Deezer API identifier |
 | `title` | `VARCHAR(255)` | `NOT NULL` | Song title |
 | `artist` | `VARCHAR(255)` | `NOT NULL` | Artist name |
 | `album` | `VARCHAR(255)` | | Album name |
