@@ -73,7 +73,7 @@ The system uses a dataset of approximately 500 songs with metadata required for 
 | Layer | Technologies |
 |-------|-------------|
 | Mobile | React Native, Expo, Expo Router, Expo Audio, TanStack Query, Zustand |
-| Backend | NestJS, PostgreSQL, Drizzle ORM, JWT auth, Swagger |
+| Backend | NestJS, PostgreSQL, Drizzle ORM, JWT auth |
 | Recommender | Python, pandas, scikit-learn, numpy |
 | Dev / Deploy | GitHub |
 

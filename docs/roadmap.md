@@ -30,7 +30,7 @@ Build the NestJS backend with all essential API routes.
 - [ ] Set up Swagger API documentation
 - [ ] Implement user authentication (register, login, JWT tokens)
 - [ ] Implement users endpoints (GET /users/me, PUT /users/preferences)
-- [ ] Implement songs endpoints (list, search, detail)
+- [ ] Implement songs endpoints (list with pagination, search, detail)
 - [ ] Implement interactions endpoint (record play, skip, like, dislike, save)
 - [ ] Implement favorites route (derived from `interactions` where `event_type = 'save'`)
 - [ ] Implement history route (derived from `interactions` where `event_type = 'play'`)
@@ -42,27 +42,27 @@ Build the NestJS backend with all essential API routes.
 Build the React Native / Expo mobile application with all core screens.
 
 - [ ] Initialize Expo project with Expo Router
-- [ ] Set up API client with JWT interceptor (axios/fetch wrapper, token attach, 401 handling)
+- [ ] Set up Zustand for local state management (auth token, player state)
+- [ ] Set up TanStack Query for API data fetching
+- [ ] Set up API client with JWT interceptor (token attach, 401 handling)
 - [ ] Implement authentication flow (register, login, token storage)
 - [ ] Implement onboarding screen (genre selection)
-- [ ] Implement home screen (song feed / recommendations)
+- [ ] Implement home screen (song feed)
 - [ ] Implement search screen
-- [ ] Implement song detail screen
+- [ ] Implement song detail screen with audio preview player (Expo Audio, play/pause, progress)
+- [ ] Track `listened_seconds` on the client and report to backend on pause/complete/skip
 - [ ] Implement favorites screen
 - [ ] Implement history screen
-- [ ] Set up TanStack Query for API data fetching
-- [ ] Set up Zustand for local state management
 
 ---
 
-## Phase 5 — Audio Preview Player
+## Phase 5 — Synthetic Interaction Data
 
-Add audio playback functionality and tracking.
+Generate synthetic user interactions so the recommendation algorithms and evaluation have sufficient data to work with. This must happen before building the recommenders.
 
-- [ ] Implement audio player component using Expo Audio
-- [ ] Add play/pause controls and progress indicator
-- [ ] Track `listened_seconds` on the client
-- [ ] Send `listened_seconds` to the backend when playback ends or is interrupted
+- [ ] Write a script to create synthetic users with varied genre preferences
+- [ ] Generate realistic interaction patterns (plays, likes, skips, saves) across the song catalog
+- [ ] Verify data volume is sufficient for collaborative filtering and evaluation metrics
 
 ---
 
@@ -70,20 +70,13 @@ Add audio playback functionality and tracking.
 
 Implement the three recommendation algorithms in Python.
 
+- [ ] Initialize Python project (dependencies: pandas, scikit-learn, numpy)
+- [ ] Set up communication layer between NestJS and Python (FastAPI microservice or subprocess)
 - [ ] **Popularity-based** — recommend globally popular songs (based on play count, like count)
 - [ ] **Content-based** — recommend songs similar to user's liked songs (using song metadata features)
 - [ ] **Collaborative filtering** — recommend songs based on similar users' interaction patterns
-- [ ] Expose recommendation results via a backend API endpoint
-
----
-
-## Phase 6.5 — Synthetic Interaction Data
-
-Generate synthetic user interactions so the recommendation algorithms and evaluation have sufficient data to work with.
-
-- [ ] Write a script to create synthetic users with varied genre preferences
-- [ ] Generate realistic interaction patterns (plays, likes, skips, saves) across the song catalog
-- [ ] Verify data volume is sufficient for collaborative filtering and evaluation metrics
+- [ ] Expose recommendation results via backend API endpoint (GET /recommendations)
+- [ ] Connect recommendations to mobile app home screen
 
 ---
 
@@ -112,7 +105,7 @@ Only pursue if the core scope (Phases 1-7) is stable and complete.
 
 ## Phase 9 — Master's Thesis
 
-Write the thesis document based on the implemented system.
+Write the thesis document based on the implemented system. The theoretical chapters (introduction, background) can be started alongside implementation phases.
 
 - [ ] Introduction — problem statement and motivation
 - [ ] Theoretical background — recommendation systems, algorithms, evaluation metrics
