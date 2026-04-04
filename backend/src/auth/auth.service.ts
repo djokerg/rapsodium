@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
@@ -29,24 +24,24 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
-    const existing = await this.db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, dto.email))
-      .limit(1);
-
-    if (existing.length > 0) {
-      throw new ConflictException('Email is already taken');
-    }
-
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
-    const [user] = await this.db
-      .insert(users)
-      .values({ email: dto.email, passwordHash })
-      .returning({ id: users.id });
+    try {
+      const [user] = await this.db
+        .insert(users)
+        .values({ email: dto.email, passwordHash })
+        .returning({ id: users.id });
 
-    return this.signToken({ sub: user.id });
+      return this.signToken({ sub: user.id });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes('duplicate key value')
+      ) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+      throw error;
+    }
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
