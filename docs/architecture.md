@@ -79,7 +79,6 @@ app/
 | Drizzle ORM | Type-safe SQL query builder and schema definition |
 | PostgreSQL | Relational database |
 | JWT (jsonwebtoken) | Stateless authentication |
-| Swagger | Auto-generated API documentation |
 
 ### Module Structure
 
