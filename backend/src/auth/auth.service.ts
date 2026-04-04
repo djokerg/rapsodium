@@ -5,14 +5,7 @@ import { eq } from 'drizzle-orm';
 import { DATABASE, type Database } from '../database/database.module.js';
 import { users } from '../database/schema.js';
 import type { RegisterDto, LoginDto } from './auth.schemas.js';
-
-export interface AuthResponse {
-  access_token: string;
-}
-
-interface JwtPayload {
-  sub: string;
-}
+import type { AuthResponse, JwtPayload } from './auth.types.js';
 
 const BCRYPT_ROUNDS = 12;
 

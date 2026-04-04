@@ -6,6 +6,7 @@ import {
   type RegisterDto,
   type LoginDto,
 } from './auth.schemas.js';
+import type { AuthResponse } from './auth.types.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 
 @Controller('auth')
@@ -14,13 +15,13 @@ export class AuthController {
 
   @Post('register')
   @UsePipes(new ZodValidationPipe(registerSchema))
-  register(@Body() body: RegisterDto) {
+  register(@Body() body: RegisterDto): Promise<AuthResponse> {
     return this.authService.register(body);
   }
 
   @Post('login')
   @UsePipes(new ZodValidationPipe(loginSchema))
-  login(@Body() body: LoginDto) {
+  login(@Body() body: LoginDto): Promise<AuthResponse> {
     return this.authService.login(body);
   }
 }

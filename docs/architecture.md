@@ -84,7 +84,7 @@ app/
 
 ```
 src/
-├── main.ts                  # Bootstrap, Swagger setup
+├── main.ts                  # Bootstrap
 ├── app.module.ts            # Root module
 ├── auth/
 │   ├── auth.module.ts

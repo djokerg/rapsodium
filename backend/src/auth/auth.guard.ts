@@ -5,11 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-interface JwtPayload {
-  sub: string;
-  iat: number;
-  exp: number;
-}
+import type { VerifiedJwtPayload } from './auth.types.js';
 
 interface RequestWithUser {
   headers: { authorization?: string };
@@ -29,7 +25,8 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+      const payload =
+        await this.jwtService.verifyAsync<VerifiedJwtPayload>(token);
       request.user = { id: payload.sub };
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
