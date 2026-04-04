@@ -27,8 +27,7 @@ Prepare the song dataset and implement the database layer.
 Build the NestJS backend with all essential API routes.
 
 - [x] Initialize NestJS application structure (modules, controllers, services)
-- [ ] Set up Swagger API documentation
-- [ ] Implement user authentication (register, login, JWT tokens)
+- [x] Implement user authentication (register, login, JWT tokens)
 - [ ] Implement users endpoints (GET /users/me, PUT /users/preferences)
 - [ ] Implement songs endpoints (list, search, detail)
 - [ ] Implement interactions endpoint (record play, skip, like, dislike, save)

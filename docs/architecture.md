@@ -79,13 +79,12 @@ app/
 | Drizzle ORM | Type-safe SQL query builder and schema definition |
 | PostgreSQL | Relational database |
 | JWT (jsonwebtoken) | Stateless authentication |
-| Swagger | Auto-generated API documentation |
 
 ### Module Structure
 
 ```
 src/
-├── main.ts                  # Bootstrap, Swagger setup
+├── main.ts                  # Bootstrap
 ├── app.module.ts            # Root module
 ├── auth/
 │   ├── auth.module.ts
