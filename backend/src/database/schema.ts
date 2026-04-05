@@ -17,14 +17,20 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
-export const userPreferences = pgTable('user_preferences', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  genre: varchar('genre', { length: 100 }).notNull(),
-  weight: real('weight').notNull().default(1.0),
-});
+export const userPreferences = pgTable(
+  'user_preferences',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    genre: varchar('genre', { length: 100 }).notNull(),
+    weight: real('weight').notNull().default(1.0),
+  },
+  (table) => [
+    uniqueIndex('user_preferences_user_genre_idx').on(table.userId, table.genre),
+  ],
+);
 
 export const songs = pgTable(
   'songs',

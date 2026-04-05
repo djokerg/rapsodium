@@ -6,18 +6,18 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { VerifiedJwtPayload } from './auth.types.js';
+import type { RequestWithUser } from '../common/types.js';
 
-interface RequestWithUser {
-  headers: { authorization?: string };
-  user?: { id: string };
-}
+type MutableRequest = Omit<RequestWithUser, 'user'> & {
+  user?: RequestWithUser['user'];
+};
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<RequestWithUser>();
+    const request = context.switchToHttp().getRequest<MutableRequest>();
     const token = this.extractToken(request);
 
     if (!token) {
@@ -35,7 +35,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private extractToken(request: RequestWithUser): string | undefined {
+  private extractToken(request: MutableRequest): string | undefined {
     const header = request.headers.authorization;
     if (!header) return undefined;
 
