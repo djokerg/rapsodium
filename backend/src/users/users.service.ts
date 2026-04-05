@@ -6,7 +6,6 @@ import type {UpdatePreferencesDto} from './users.schemas.js';
 
 export interface Preference {
   genre: string;
-  weight: number;
 }
 
 export interface UserProfile {
@@ -38,7 +37,6 @@ export class UsersService {
     const preferences = await this.db
       .select({
         genre: userPreferences.genre,
-        weight: userPreferences.weight,
       })
       .from(userPreferences)
       .where(eq(userPreferences.userId, userId));
@@ -68,15 +66,13 @@ export class UsersService {
       return tx
           .insert(userPreferences)
           .values(
-              preferences.map((p) => ({
+              preferences.map((genre) => ({
                   userId,
-                  genre: p.genre,
-                  weight: p.weight,
+                  genre,
               })),
           )
           .returning({
               genre: userPreferences.genre,
-              weight: userPreferences.weight,
           });
     });
   }
