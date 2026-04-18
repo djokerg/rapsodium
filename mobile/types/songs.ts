@@ -8,6 +8,10 @@ export interface SongSummary {
   coverUrl: string | null;
 }
 
+export interface SongDetail extends SongSummary {
+  previewUrl: string | null;
+}
+
 export interface PaginatedResult<T> {
   data: T[];
   meta: {
