@@ -56,7 +56,7 @@ export async function apiFetch<T>(
   });
 
   if (response.status === 401) {
-    useAuthStore.getState().clearToken();
+    void useAuthStore.getState().clearToken();
   }
 
   if (!response.ok) {
