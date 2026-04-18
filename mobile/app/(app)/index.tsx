@@ -16,11 +16,13 @@ import { useFavoriteIds } from '@/hooks/useFavoriteIds';
 import { useSongs } from '@/hooks/useSongs';
 import { useToggleSave } from '@/hooks/useToggleSave';
 import { useAuthStore } from '@/stores/auth.store';
+import { usePlayerStore } from '@/stores/player.store';
 import type { SongSummary } from '@/types/songs';
 
 export default function Home() {
   const router = useRouter();
   const clearToken = useAuthStore((s) => s.clearToken);
+  const setQueue = usePlayerStore((s) => s.setQueue);
 
   const handleLogout = async (): Promise<void> => {
     await clearToken();
@@ -50,10 +52,14 @@ export default function Home() {
           song={item}
           isSaved={isSaved}
           onToggleSave={() => toggleSave.mutate({ songId: item.id, isSaved })}
+          onPress={() => {
+            setQueue(songs.map((s) => s.id));
+            router.push(`/song/${item.id}`);
+          }}
         />
       );
     },
-    [favoriteIds, toggleSave],
+    [favoriteIds, toggleSave, setQueue, router],
   );
 
   const onEndReached = useCallback((): void => {

@@ -15,12 +15,14 @@ import { SongRow } from '@/components/SongRow';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
 import { useSearchSongs } from '@/hooks/useSearchSongs';
 import { useToggleSave } from '@/hooks/useToggleSave';
+import { usePlayerStore } from '@/stores/player.store';
 import type { SongSummary } from '@/types/songs';
 
 const DEBOUNCE_MS = 300;
 
 export default function Search() {
   const router = useRouter();
+  const setQueue = usePlayerStore((s) => s.setQueue);
   const [input, setInput] = useState('');
   const [debounced, setDebounced] = useState('');
 
@@ -52,10 +54,14 @@ export default function Search() {
           song={item}
           isSaved={isSaved}
           onToggleSave={() => toggleSave.mutate({ songId: item.id, isSaved })}
+          onPress={() => {
+            setQueue(songs.map((s) => s.id));
+            router.push(`/song/${item.id}`);
+          }}
         />
       );
     },
-    [favoriteIds, toggleSave],
+    [favoriteIds, toggleSave, setQueue, router],
   );
 
   const onEndReached = useCallback((): void => {

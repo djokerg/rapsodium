@@ -1,15 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
 import { useRecordPlay } from '@/hooks/useRecordPlay';
 import { useSong } from '@/hooks/useSong';
 import { useToggleSave } from '@/hooks/useToggleSave';
+import { usePlayerStore } from '@/stores/player.store';
 
 function formatTime(sec: number): string {
   if (!Number.isFinite(sec) || sec < 0) return '0:00';
@@ -25,6 +27,7 @@ export default function SongDetail() {
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
   const recordPlay = useRecordPlay();
+  const queue = usePlayerStore((s) => s.queue);
 
   const source = useMemo(
     () => (song?.previewUrl ? { uri: song.previewUrl } : null),
@@ -36,7 +39,17 @@ export default function SongDetail() {
   const isSaved = favoriteIds?.has(id) ?? false;
   const positionSec = status.currentTime ?? 0;
   const durationSec = status.duration || song?.durationSec || 0;
-  const progress = durationSec > 0 ? positionSec / durationSec : 0;
+
+  const [scrubbing, setScrubbing] = useState(false);
+  const [scrubValue, setScrubValue] = useState(0);
+  const displayedPosition = scrubbing ? scrubValue : positionSec;
+
+  const currentIdx = queue.indexOf(id);
+  const prevId = currentIdx > 0 ? queue[currentIdx - 1] : null;
+  const nextId =
+    currentIdx >= 0 && currentIdx < queue.length - 1
+      ? queue[currentIdx + 1]
+      : null;
 
   const sessionMaxRef = useRef(0);
   const sessionOpenRef = useRef(false);
@@ -70,7 +83,7 @@ export default function SongDetail() {
       reportAndCloseSession();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id]);
 
   const togglePlayback = (): void => {
     if (!source) return;
@@ -84,6 +97,11 @@ export default function SongDetail() {
       sessionOpenRef.current = true;
       player.play();
     }
+  };
+
+  const navigateTo = (targetId: string): void => {
+    reportAndCloseSession();
+    router.replace(`/song/${targetId}`);
   };
 
   if (isLoading) {
@@ -187,23 +205,49 @@ export default function SongDetail() {
           </View>
         </View>
 
-        <View className="px-8 pb-6">
-          <View className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-            <View
-              className="h-full bg-brand-300"
-              style={{ width: `${Math.min(100, progress * 100)}%` }}
-            />
-          </View>
-          <View className="mt-2 flex-row justify-between">
+        <View className="px-6 pb-6">
+          <Slider
+            style={{ width: '100%', height: 36 }}
+            minimumValue={0}
+            maximumValue={durationSec > 0 ? durationSec : 1}
+            value={displayedPosition}
+            minimumTrackTintColor="#22d3ee"
+            maximumTrackTintColor="rgba(255,255,255,0.15)"
+            thumbTintColor="#67e8f9"
+            disabled={!source || durationSec <= 0}
+            onSlidingStart={() => {
+              setScrubbing(true);
+              setScrubValue(positionSec);
+            }}
+            onValueChange={(v) => setScrubValue(v)}
+            onSlidingComplete={(v) => {
+              player.seekTo(v);
+              setScrubbing(false);
+            }}
+          />
+          <View className="flex-row justify-between px-1">
             <Text className="text-xs text-brand-100/60">
-              {formatTime(positionSec)}
+              {formatTime(displayedPosition)}
             </Text>
             <Text className="text-xs text-brand-100/60">
               {formatTime(durationSec)}
             </Text>
           </View>
 
-          <View className="mt-6 items-center">
+          <View className="mt-6 flex-row items-center justify-center" style={{ gap: 24 }}>
+            <Pressable
+              onPress={() => prevId && navigateTo(prevId)}
+              disabled={!prevId}
+              hitSlop={8}
+              className="h-12 w-12 items-center justify-center rounded-full"
+            >
+              <Ionicons
+                name="play-skip-back"
+                size={28}
+                color={prevId ? '#ffffff' : '#ffffff55'}
+              />
+            </Pressable>
+
             <Pressable
               onPress={togglePlayback}
               disabled={!source}
@@ -220,12 +264,26 @@ export default function SongDetail() {
                 style={{ marginLeft: status.playing ? 0 : 3 }}
               />
             </Pressable>
-            {!source ? (
-              <Text className="mt-3 text-center text-xs text-brand-100/60">
-                No preview available
-              </Text>
-            ) : null}
+
+            <Pressable
+              onPress={() => nextId && navigateTo(nextId)}
+              disabled={!nextId}
+              hitSlop={8}
+              className="h-12 w-12 items-center justify-center rounded-full"
+            >
+              <Ionicons
+                name="play-skip-forward"
+                size={28}
+                color={nextId ? '#ffffff' : '#ffffff55'}
+              />
+            </Pressable>
           </View>
+
+          {!source ? (
+            <Text className="mt-4 text-center text-xs text-brand-100/60">
+              No preview available
+            </Text>
+          ) : null}
         </View>
       </SafeAreaView>
     </View>

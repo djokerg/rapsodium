@@ -9,6 +9,7 @@ interface SongRowProps {
   song: SongSummary;
   isSaved: boolean;
   onToggleSave: () => void;
+  onPress?: () => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -17,12 +18,20 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function SongRowInner({ song, isSaved, onToggleSave }: SongRowProps) {
+function SongRowInner({ song, isSaved, onToggleSave, onPress }: SongRowProps) {
   const router = useRouter();
+
+  const handlePress = (): void => {
+    if (onPress) {
+      onPress();
+    } else {
+      router.push(`/song/${song.id}`);
+    }
+  };
 
   return (
     <Pressable
-      onPress={() => router.push(`/song/${song.id}`)}
+      onPress={handlePress}
       className="flex-row items-center gap-3 border-b border-white/5 px-4 py-3 active:bg-white/5"
     >
       <View className="h-14 w-14 overflow-hidden rounded-lg bg-ink-800">
