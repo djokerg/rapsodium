@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { asc, eq, ilike, or, count } from 'drizzle-orm';
 import { DATABASE, type Database } from '../database/database.module.js';
 import { songs } from '../database/schema.js';
+import { DeezerService } from './deezer.service.js';
 import type { SongSummary, SongDetail, PaginatedResult } from './songs.types.js';
 
 export type { SongSummary, SongDetail, PaginatedResult };
@@ -22,7 +23,10 @@ const summaryColumns = {
 
 @Injectable()
 export class SongsService {
-  constructor(@Inject(DATABASE) private readonly db: Database) {}
+  constructor(
+    @Inject(DATABASE) private readonly db: Database,
+    private readonly deezerService: DeezerService,
+  ) {}
 
   async list(page: number, limit: number): Promise<PaginatedResult<SongSummary>> {
     const offset = (page - 1) * limit;
@@ -75,6 +79,7 @@ export class SongsService {
     const [song] = await this.db
       .select({
         ...summaryColumns,
+        deezerId: songs.deezerId,
         previewUrl: songs.previewUrl,
       })
       .from(songs)
@@ -85,6 +90,9 @@ export class SongsService {
       throw new NotFoundException('Song not found');
     }
 
-    return song;
+    const { deezerId, previewUrl: storedPreviewUrl, ...rest } = song;
+    const freshPreviewUrl = await this.deezerService.getFreshPreviewUrl(deezerId);
+
+    return { ...rest, previewUrl: freshPreviewUrl ?? storedPreviewUrl };
   }
 }
