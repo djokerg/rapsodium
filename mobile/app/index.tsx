@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FloatingOrbs } from '@/components/FloatingOrbs';
 
 export default function Welcome() {
   const logoOpacity = useSharedValue(0);
@@ -40,11 +41,12 @@ export default function Welcome() {
   return (
     <View className="flex-1 bg-ink-950">
       <LinearGradient
-        colors={['#020617', '#0e7490', '#22d3ee']}
+        colors={['#020617', '#0c4a6e', '#155e75']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ position: 'absolute', inset: 0 }}
       />
+      <FloatingOrbs />
       <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
         <View className="flex-1 justify-between px-8 py-12">
           <Animated.View

@@ -44,7 +44,7 @@ Build the React Native / Expo mobile application with all core screens.
 - [x] Set up Zustand for local state management (auth token, player state)
 - [x] Set up TanStack Query for API data fetching
 - [x] Set up API client with JWT interceptor (token attach, 401 handling)
-- [ ] Implement authentication flow (register, login, token storage)
+- [x] Implement authentication flow (register, login, token storage)
 - [ ] Implement onboarding screen (genre selection)
 - [ ] Implement home screen (song feed)
 - [ ] Implement search screen

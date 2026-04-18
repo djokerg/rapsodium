@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
@@ -22,8 +23,18 @@ export default function Home() {
         style={{ position: 'absolute', inset: 0 }}
       />
       <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+        <View className="flex-row justify-end px-6 pt-2">
+          <Pressable
+            onPress={() => router.push('/(app)/preferences')}
+            hitSlop={8}
+            className="h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
+          >
+            <Ionicons name="options-outline" size={20} color="#ffffff" />
+          </Pressable>
+        </View>
+
         <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-4xl font-bold text-white">You're in 🎉</Text>
+          <Text className="text-4xl font-bold text-white">You&apos;re in 🎉</Text>
           <Text className="mt-3 text-center text-base text-brand-100/80">
             Home feed, search, favorites, and history are on the way.
           </Text>

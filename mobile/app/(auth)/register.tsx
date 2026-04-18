@@ -42,7 +42,7 @@ export default function Register() {
         body: { email: email.trim(), password },
       });
       await setToken(res.access_token);
-      router.replace('/(app)');
+      router.replace('/(app)/onboarding');
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
