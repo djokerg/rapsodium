@@ -30,7 +30,7 @@ Build the NestJS backend with all essential API routes.
 - [x] Implement user authentication (register, login, JWT tokens)
 - [x] Implement users endpoints (GET /users/me, PUT /users/preferences)
 - [x] Implement songs endpoints (list with pagination, search, detail)
-- [ ] Implement interactions endpoint (record play, skip, like, dislike, save)
+- [x] Implement interactions endpoint (record play, skip, like, dislike, save)
 - [ ] Implement favorites route (derived from `interactions` where `event_type = 'save'`)
 - [ ] Implement history route (derived from `interactions` where `event_type = 'play'`)
 

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -10,8 +11,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard.js';
+import {
+  paginationSchema,
+  type PaginationDto,
+} from '../common/pagination.schema.js';
 import type { RequestWithUser } from '../common/types.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
+import type { PaginatedResult } from '../songs/songs.types.js';
 import {
   createInteractionSchema,
   deleteInteractionSchema,
@@ -19,7 +25,7 @@ import {
   type DeleteInteractionDto,
 } from './interactions.schemas.js';
 import { InteractionsService } from './interactions.service.js';
-import type { Interaction } from './interactions.types.js';
+import type { Interaction, SongWithTimestamp } from './interactions.types.js';
 
 @Controller('interactions')
 @UseGuards(AuthGuard)
@@ -47,6 +53,30 @@ export class InteractionsController {
       req.user.id,
       query.songId,
       query.eventType,
+    );
+  }
+
+  @Get('favorites')
+  getFavorites(
+    @Req() req: RequestWithUser,
+    @Query(new ZodValidationPipe(paginationSchema)) query: PaginationDto,
+  ): Promise<PaginatedResult<SongWithTimestamp>> {
+    return this.interactionsService.getFavorites(
+      req.user.id,
+      query.page,
+      query.limit,
+    );
+  }
+
+  @Get('history')
+  getHistory(
+    @Req() req: RequestWithUser,
+    @Query(new ZodValidationPipe(paginationSchema)) query: PaginationDto,
+  ): Promise<PaginatedResult<SongWithTimestamp>> {
+    return this.interactionsService.getHistory(
+      req.user.id,
+      query.page,
+      query.limit,
     );
   }
 }

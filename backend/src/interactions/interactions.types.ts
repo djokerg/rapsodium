@@ -1,3 +1,4 @@
+import type { SongSummary } from '../songs/songs.types.js';
 import type { EventType } from './interactions.schemas.js';
 
 export interface Interaction {
@@ -7,4 +8,8 @@ export interface Interaction {
   eventType: EventType;
   listenedSeconds: number | null;
   createdAt: Date;
+}
+
+export interface SongWithTimestamp extends SongSummary {
+  interactedAt: Date;
 }
