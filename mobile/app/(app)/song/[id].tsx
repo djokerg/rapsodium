@@ -38,32 +38,36 @@ export default function SongDetail() {
   const durationSec = status.duration || song?.durationSec || 0;
   const progress = durationSec > 0 ? positionSec / durationSec : 0;
 
-  const maxListenedRef = useRef(0);
-  const reportedRef = useRef(false);
+  const sessionMaxRef = useRef(0);
+  const sessionOpenRef = useRef(false);
+  const recordPlayMutate = recordPlay.mutate;
 
   useEffect(() => {
-    if (positionSec > maxListenedRef.current) {
-      maxListenedRef.current = positionSec;
+    if (sessionOpenRef.current && positionSec > sessionMaxRef.current) {
+      sessionMaxRef.current = positionSec;
     }
   }, [positionSec]);
 
-  const reportPlayOnce = (): void => {
-    if (reportedRef.current) return;
-    if (!id || maxListenedRef.current <= 0) return;
-    reportedRef.current = true;
-    recordPlay.mutate({ songId: id, listenedSeconds: maxListenedRef.current });
+  const reportAndCloseSession = (): void => {
+    if (!sessionOpenRef.current) return;
+    const listened = sessionMaxRef.current;
+    sessionOpenRef.current = false;
+    sessionMaxRef.current = 0;
+    if (id && listened >= 1) {
+      recordPlayMutate({ songId: id, listenedSeconds: listened });
+    }
   };
 
   useEffect(() => {
     if (status.didJustFinish) {
-      reportPlayOnce();
+      reportAndCloseSession();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.didJustFinish]);
 
   useEffect(() => {
     return () => {
-      reportPlayOnce();
+      reportAndCloseSession();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -72,10 +76,12 @@ export default function SongDetail() {
     if (!source) return;
     if (status.playing) {
       player.pause();
+      reportAndCloseSession();
     } else {
       if (status.didJustFinish) {
         player.seekTo(0);
       }
+      sessionOpenRef.current = true;
       player.play();
     }
   };
