@@ -15,10 +15,17 @@ import { SongRow } from '@/components/SongRow';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
 import { useSongs } from '@/hooks/useSongs';
 import { useToggleSave } from '@/hooks/useToggleSave';
+import { useAuthStore } from '@/stores/auth.store';
 import type { SongSummary } from '@/types/songs';
 
 export default function Home() {
   const router = useRouter();
+  const clearToken = useAuthStore((s) => s.clearToken);
+
+  const handleLogout = async (): Promise<void> => {
+    await clearToken();
+    router.replace('/');
+  };
   const {
     data,
     isLoading,
@@ -66,13 +73,29 @@ export default function Home() {
       <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
         <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
           <Text className="text-2xl font-bold text-white">For you</Text>
-          <Pressable
-            onPress={() => router.push('/(app)/preferences')}
-            hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
-          >
-            <Ionicons name="options-outline" size={20} color="#ffffff" />
-          </Pressable>
+          <View className="flex-row" style={{ gap: 8 }}>
+            <Pressable
+              onPress={() => router.push('/(app)/search')}
+              hitSlop={8}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
+            >
+              <Ionicons name="search" size={20} color="#ffffff" />
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/(app)/preferences')}
+              hitSlop={8}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
+            >
+              <Ionicons name="options-outline" size={20} color="#ffffff" />
+            </Pressable>
+            <Pressable
+              onPress={handleLogout}
+              hitSlop={8}
+              className="h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
+            >
+              <Ionicons name="log-out-outline" size={20} color="#fda4af" />
+            </Pressable>
+          </View>
         </View>
 
         {isLoading ? (
