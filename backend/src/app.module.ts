@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { SongsModule } from './songs/songs.module.js';
+import { InteractionsModule } from './interactions/interactions.module.js';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SongsModule } from './songs/songs.module.js';
     AuthModule,
     UsersModule,
     SongsModule,
+    InteractionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

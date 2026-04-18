@@ -8,6 +8,13 @@
       "when": 1775058030315,
       "tag": "0000_past_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776508502312,
+      "tag": "0001_awesome_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

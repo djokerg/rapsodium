@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
@@ -8,6 +13,20 @@ import type { RegisterDto, LoginDto } from './auth.schemas.js';
 import type { AuthResponse, JwtPayload } from './auth.types.js';
 
 const BCRYPT_ROUNDS = 12;
+const PG_UNIQUE_VIOLATION = '23505';
+
+function isUniqueViolation(error: unknown): boolean {
+  if (!(error instanceof Error) || !('cause' in error)) {
+    return false;
+  }
+  const cause = (error as { cause?: unknown }).cause;
+  return (
+    typeof cause === 'object' &&
+    cause !== null &&
+    'code' in cause &&
+    (cause as { code?: unknown }).code === PG_UNIQUE_VIOLATION
+  );
+}
 
 @Injectable()
 export class AuthService {
@@ -27,11 +46,8 @@ export class AuthService {
 
       return this.signToken({ sub: user.id });
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes('duplicate key value')
-      ) {
-        throw new UnauthorizedException('Invalid email or password');
+      if (isUniqueViolation(error)) {
+        throw new BadRequestException('Unable to complete registration');
       }
       throw error;
     }

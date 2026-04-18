@@ -21,7 +21,8 @@
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",
     "db:push": "npx drizzle-kit push",
-    "db:seed": "npx tsx src/database/seed.ts"
+    "db:seed": "npx tsx src/database/seed.ts",
+    "db:preview": "npx drizzle-kit studio"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

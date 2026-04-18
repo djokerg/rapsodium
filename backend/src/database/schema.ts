@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   pgTable,
   uuid,
@@ -53,15 +54,23 @@ export const songs = pgTable(
   (table) => [uniqueIndex('songs_deezer_id_idx').on(table.deezerId)],
 );
 
-export const interactions = pgTable('interactions', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  songId: uuid('song_id')
-    .notNull()
-    .references(() => songs.id, { onDelete: 'cascade' }),
-  eventType: varchar('event_type', { length: 20 }).notNull(),
-  listenedSeconds: integer('listened_seconds'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const interactions = pgTable(
+  'interactions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    songId: uuid('song_id')
+      .notNull()
+      .references(() => songs.id, { onDelete: 'cascade' }),
+    eventType: varchar('event_type', { length: 20 }).notNull(),
+    listenedSeconds: integer('listened_seconds'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('interactions_toggle_unique_idx')
+      .on(table.userId, table.songId, table.eventType)
+      .where(sql`event_type in ('like', 'save', 'dislike')`),
+  ],
+);
