@@ -71,6 +71,6 @@ export const interactions = pgTable(
   (table) => [
     uniqueIndex('interactions_toggle_unique_idx')
       .on(table.userId, table.songId, table.eventType)
-      .where(sql`event_type in ('like', 'save', 'dislike')`),
+      .where(sql`event_type = 'save'`),
   ],
 );

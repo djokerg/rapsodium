@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GenreGrid } from '@/components/GenreGrid';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ApiError, apiFetch } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth.store';
 
 const MIN_GENRES = 3;
 
@@ -18,10 +19,16 @@ interface UserProfile {
 
 export default function Preferences() {
   const router = useRouter();
+  const clearToken = useAuthStore((s) => s.clearToken);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleLogout = async (): Promise<void> => {
+    await clearToken();
+    router.replace('/');
+  };
 
   useEffect(() => {
     const load = async (): Promise<void> => {
@@ -137,6 +144,14 @@ export default function Preferences() {
                 loading={submitting}
                 disabled={!canSave}
               />
+              <Pressable
+                onPress={handleLogout}
+                className="mt-3 w-full rounded-2xl border border-white/15 bg-white/5 px-6 py-4 active:bg-white/10"
+              >
+                <Text className="text-center text-base font-semibold text-rose-200">
+                  Log out
+                </Text>
+              </Pressable>
             </View>
           </>
         )}

@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
-export const EVENT_TYPES = ['play', 'skip', 'like', 'dislike', 'save'] as const;
+export const EVENT_TYPES = ['play', 'skip', 'save'] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
-export const TOGGLE_EVENT_TYPES = ['like', 'dislike', 'save'] as const;
+export const TOGGLE_EVENT_TYPES = ['save'] as const;
 export type ToggleEventType = (typeof TOGGLE_EVENT_TYPES)[number];
 
 export function isToggleEvent(eventType: EventType): eventType is ToggleEventType {

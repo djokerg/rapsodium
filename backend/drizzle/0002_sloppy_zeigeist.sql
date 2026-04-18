@@ -1,0 +1,2 @@
+DROP INDEX "interactions_toggle_unique_idx";--> statement-breakpoint
+CREATE UNIQUE INDEX "interactions_toggle_unique_idx" ON "interactions" USING btree ("user_id","song_id","event_type") WHERE event_type = 'save';

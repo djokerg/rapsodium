@@ -1,18 +1,59 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '@/stores/auth.store';
+import { SongRow } from '@/components/SongRow';
+import { useFavoriteIds } from '@/hooks/useFavoriteIds';
+import { useSongs } from '@/hooks/useSongs';
+import { useToggleSave } from '@/hooks/useToggleSave';
+import type { SongSummary } from '@/types/songs';
 
 export default function Home() {
   const router = useRouter();
-  const clearToken = useAuthStore((s) => s.clearToken);
+  const {
+    data,
+    isLoading,
+    isRefetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+    error,
+  } = useSongs();
+  const { data: favoriteIds } = useFavoriteIds();
+  const toggleSave = useToggleSave();
 
-  const handleLogout = async (): Promise<void> => {
-    await clearToken();
-    router.replace('/');
-  };
+  const songs: SongSummary[] =
+    data?.pages.flatMap((page) => page.data) ?? [];
+
+  const renderItem = useCallback(
+    ({ item }: { item: SongSummary }) => {
+      const isSaved = favoriteIds?.has(item.id) ?? false;
+      return (
+        <SongRow
+          song={item}
+          isSaved={isSaved}
+          onToggleSave={() => toggleSave.mutate({ songId: item.id, isSaved })}
+        />
+      );
+    },
+    [favoriteIds, toggleSave],
+  );
+
+  const onEndReached = useCallback((): void => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <View className="flex-1 bg-ink-950">
@@ -23,7 +64,8 @@ export default function Home() {
         style={{ position: 'absolute', inset: 0 }}
       />
       <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
-        <View className="flex-row justify-end px-6 pt-2">
+        <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
+          <Text className="text-2xl font-bold text-white">For you</Text>
           <Pressable
             onPress={() => router.push('/(app)/preferences')}
             hitSlop={8}
@@ -33,23 +75,52 @@ export default function Home() {
           </Pressable>
         </View>
 
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-4xl font-bold text-white">You&apos;re in 🎉</Text>
-          <Text className="mt-3 text-center text-base text-brand-100/80">
-            Home feed, search, favorites, and history are on the way.
-          </Text>
-        </View>
-
-        <View className="px-6 pb-6">
-          <Pressable
-            onPress={handleLogout}
-            className="w-full rounded-2xl border border-white/20 bg-white/5 px-6 py-4 active:bg-white/10"
-          >
-            <Text className="text-center text-base font-semibold text-white">
-              Log out
+        {isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator color="#67e8f9" />
+          </View>
+        ) : error ? (
+          <View className="flex-1 items-center justify-center px-8">
+            <Text className="text-center text-base text-rose-200">
+              Couldn&apos;t load songs.
             </Text>
-          </Pressable>
-        </View>
+            <Pressable
+              onPress={() => void refetch()}
+              className="mt-4 rounded-full bg-white/10 px-4 py-2 active:bg-white/20"
+            >
+              <Text className="text-white">Try again</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <FlatList
+            data={songs}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.5}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching && !isFetchingNextPage}
+                onRefresh={() => void refetch()}
+                tintColor="#67e8f9"
+              />
+            }
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View className="py-6">
+                  <ActivityIndicator color="#67e8f9" />
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              <View className="flex-1 items-center justify-center px-8 pt-24">
+                <Text className="text-center text-base text-brand-100/70">
+                  No songs yet.
+                </Text>
+              </View>
+            }
+          />
+        )}
       </SafeAreaView>
     </View>
   );
