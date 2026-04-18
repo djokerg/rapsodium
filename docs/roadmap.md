@@ -31,8 +31,8 @@ Build the NestJS backend with all essential API routes.
 - [x] Implement users endpoints (GET /users/me, PUT /users/preferences)
 - [x] Implement songs endpoints (list with pagination, search, detail)
 - [x] Implement interactions endpoint (record play, skip, like, dislike, save)
-- [ ] Implement favorites route (derived from `interactions` where `event_type = 'save'`)
-- [ ] Implement history route (derived from `interactions` where `event_type = 'play'`)
+- [x] Implement favorites route (derived from `interactions` where `event_type = 'save'`)
+- [x] Implement history route (derived from `interactions` where `event_type = 'play'`)
 
 ---
 
@@ -40,10 +40,10 @@ Build the NestJS backend with all essential API routes.
 
 Build the React Native / Expo mobile application with all core screens.
 
-- [ ] Initialize Expo project with Expo Router
-- [ ] Set up Zustand for local state management (auth token, player state)
-- [ ] Set up TanStack Query for API data fetching
-- [ ] Set up API client with JWT interceptor (token attach, 401 handling)
+- [x] Initialize Expo project with Expo Router
+- [x] Set up Zustand for local state management (auth token, player state)
+- [x] Set up TanStack Query for API data fetching
+- [x] Set up API client with JWT interceptor (token attach, 401 handling)
 - [ ] Implement authentication flow (register, login, token storage)
 - [ ] Implement onboarding screen (genre selection)
 - [ ] Implement home screen (song feed)
