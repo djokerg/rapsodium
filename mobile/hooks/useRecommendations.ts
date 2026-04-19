@@ -4,19 +4,29 @@ import type { SongSummary } from '@/types/songs';
 
 const LIMIT = 50;
 
-export const recommendationsQueryKey = ['recommendations', 'popularity'] as const;
+export type Algorithm = 'popularity' | 'content' | 'collaborative';
+
+// Backend only implements 'popularity' in Phase A; the other two are UI stubs.
+const IMPLEMENTED: ReadonlySet<Algorithm> = new Set(['popularity']);
+
+export const isAlgorithmImplemented = (algorithm: Algorithm): boolean =>
+  IMPLEMENTED.has(algorithm);
 
 interface RecommendationsResponse {
-  algorithm: 'popularity';
+  algorithm: Algorithm;
   data: SongSummary[];
 }
 
-export function useRecommendations() {
+export const recommendationsQueryKey = (algorithm: Algorithm) =>
+  ['recommendations', algorithm] as const;
+
+export function useRecommendations(algorithm: Algorithm) {
   return useQuery({
-    queryKey: recommendationsQueryKey,
+    queryKey: recommendationsQueryKey(algorithm),
     queryFn: () =>
       apiFetch<RecommendationsResponse>(
-        `/recommendations?algorithm=popularity&limit=${LIMIT}`,
+        `/recommendations?algorithm=${algorithm}&limit=${LIMIT}`,
       ),
+    enabled: isAlgorithmImplemented(algorithm),
   });
 }

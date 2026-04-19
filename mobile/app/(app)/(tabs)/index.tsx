@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,25 +11,59 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  AlgorithmPicker,
+  type AlgorithmOption,
+} from '@/components/AlgorithmPicker';
 import { SongRow } from '@/components/SongRow';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
-import { useRecommendations } from '@/hooks/useRecommendations';
+import {
+  isAlgorithmImplemented,
+  useRecommendations,
+  type Algorithm,
+} from '@/hooks/useRecommendations';
 import { useToggleSave } from '@/hooks/useToggleSave';
 import { useAuthStore } from '@/stores/auth.store';
 import { usePlayerStore } from '@/stores/player.store';
 import type { SongSummary } from '@/types/songs';
+
+const OPTIONS: readonly AlgorithmOption<Algorithm>[] = [
+  { value: 'popularity', label: 'Popular' },
+  { value: 'content', label: 'You might like' },
+  { value: 'collaborative', label: 'Your crowd loves' },
+];
+
+const COPY: Record<Algorithm, { tagline: string; comingSoon: string }> = {
+  popularity: {
+    tagline: 'Global favorites, filtered to your picked genres.',
+    comingSoon: '',
+  },
+  content: {
+    tagline: 'Picked from your saved songs.',
+    comingSoon:
+      'We\u2019ll find songs with a similar feel — tempo, energy, mood — to the tracks you\u2019ve saved.',
+  },
+  collaborative: {
+    tagline: 'From listeners with a taste like yours.',
+    comingSoon:
+      'We\u2019ll match you with listeners who save the same songs, and surface what they love that you haven\u2019t heard yet.',
+  },
+};
 
 export default function Home() {
   const router = useRouter();
   const clearToken = useAuthStore((s) => s.clearToken);
   const setQueue = usePlayerStore((s) => s.setQueue);
 
+  const [algorithm, setAlgorithm] = useState<Algorithm>('popularity');
+
   const handleLogout = async (): Promise<void> => {
     await clearToken();
     router.replace('/');
   };
 
-  const { data, isLoading, isRefetching, refetch, error } = useRecommendations();
+  const { data, isLoading, isRefetching, refetch, error } =
+    useRecommendations(algorithm);
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
 
@@ -50,8 +84,77 @@ export default function Home() {
         />
       );
     },
-    [favoriteIds, toggleSave, setQueue, router],
+    [favoriteIds, toggleSave, setQueue, router, songs],
   );
+
+  const implemented = isAlgorithmImplemented(algorithm);
+
+  const renderBody = () => {
+    if (!implemented) {
+      return (
+        <View className="flex-1 items-center justify-center px-8">
+          <View className="h-16 w-16 items-center justify-center rounded-full bg-white/10">
+            <Ionicons name="sparkles-outline" size={28} color="#67e8f9" />
+          </View>
+          <Text className="mt-4 text-center text-lg font-semibold text-white">
+            Coming soon
+          </Text>
+          <Text className="mt-2 text-center text-sm text-brand-100/70">
+            {COPY[algorithm].comingSoon}
+          </Text>
+        </View>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color="#67e8f9" />
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View className="flex-1 items-center justify-center px-8">
+          <Text className="text-center text-base text-rose-200">
+            Couldn&apos;t load recommendations.
+          </Text>
+          <Text className="mt-2 text-center text-sm text-brand-100/60">
+            Make sure the recommender service is running.
+          </Text>
+          <Pressable
+            onPress={() => void refetch()}
+            className="mt-4 rounded-full bg-white/10 px-4 py-2 active:bg-white/20"
+          >
+            <Text className="text-white">Try again</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    return (
+      <FlatList
+        data={songs}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => void refetch()}
+            tintColor="#67e8f9"
+          />
+        }
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center px-8 pt-24">
+            <Text className="text-center text-base text-brand-100/70">
+              No recommendations yet. Try saving or playing a few songs.
+            </Text>
+          </View>
+        }
+      />
+    );
+  };
 
   return (
     <View className="flex-1 bg-ink-950">
@@ -62,7 +165,7 @@ export default function Home() {
         style={{ position: 'absolute', inset: 0 }}
       />
       <SafeAreaView className="flex-1" edges={['top']}>
-        <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
+        <View className="flex-row items-center justify-between px-4 pb-1 pt-2">
           <Text className="text-2xl font-bold text-white">For you</Text>
           <View className="flex-row" style={{ gap: 8 }}>
             <Pressable
@@ -89,46 +192,20 @@ export default function Home() {
           </View>
         </View>
 
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#67e8f9" />
-          </View>
-        ) : error ? (
-          <View className="flex-1 items-center justify-center px-8">
-            <Text className="text-center text-base text-rose-200">
-              Couldn&apos;t load recommendations.
-            </Text>
-            <Text className="mt-2 text-center text-sm text-brand-100/60">
-              Make sure the recommender service is running.
-            </Text>
-            <Pressable
-              onPress={() => void refetch()}
-              className="mt-4 rounded-full bg-white/10 px-4 py-2 active:bg-white/20"
-            >
-              <Text className="text-white">Try again</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <FlatList
-            data={songs}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefetching}
-                onRefresh={() => void refetch()}
-                tintColor="#67e8f9"
-              />
-            }
-            ListEmptyComponent={
-              <View className="flex-1 items-center justify-center px-8 pt-24">
-                <Text className="text-center text-base text-brand-100/70">
-                  No recommendations yet. Try saving or playing a few songs.
-                </Text>
-              </View>
-            }
-          />
-        )}
+        <Text
+          numberOfLines={1}
+          className="px-4 pb-2 text-xs text-brand-100/60"
+        >
+          {COPY[algorithm].tagline}
+        </Text>
+
+        <AlgorithmPicker
+          options={OPTIONS}
+          value={algorithm}
+          onChange={setAlgorithm}
+        />
+
+        {renderBody()}
       </SafeAreaView>
     </View>
   );
