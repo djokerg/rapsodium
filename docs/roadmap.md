@@ -50,8 +50,8 @@ Build the React Native / Expo mobile application with all core screens.
 - [x] Implement search screen
 - [x] Implement song detail screen with audio preview player (Expo Audio, play/pause, progress)
 - [x] Track `listened_seconds` on the client and report to backend on pause/complete/skip
-- [ ] Implement favorites screen
-- [ ] Implement history screen
+- [x] Implement favorites screen
+- [x] Implement history screen
 
 ---
 

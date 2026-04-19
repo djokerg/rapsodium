@@ -36,7 +36,7 @@ export default function Onboarding() {
         method: 'PUT',
         body: Array.from(selected),
       });
-      router.replace('/(app)');
+      router.replace('/(app)/(tabs)');
     } catch (err) {
       setError(
         err instanceof ApiError

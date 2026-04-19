@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, count, countDistinct, desc, eq, sql } from 'drizzle-orm';
+import { and, count, countDistinct, desc, eq, max } from 'drizzle-orm';
 import { DATABASE, type Database } from '../database/database.module.js';
 import { interactions, songs } from '../database/schema.js';
 import type { PaginatedResult } from '../songs/songs.types.js';
@@ -144,9 +144,7 @@ export class InteractionsService {
       eq(interactions.userId, userId),
       eq(interactions.eventType, 'play'),
     );
-    const interactedAt = sql<Date>`max(${interactions.createdAt})`.as(
-      'interacted_at',
-    );
+    const interactedAt = max(interactions.createdAt).as('interacted_at');
 
     const [data, totalRows] = await Promise.all([
       this.db
@@ -169,6 +167,14 @@ export class InteractionsService {
 
     const total = totalRows[0]?.total ?? 0;
 
-    return { data, meta: { page, limit, total } };
+    const normalized: SongWithTimestamp[] = data.map((row) => ({
+      ...row,
+      interactedAt:
+        row.interactedAt instanceof Date
+          ? row.interactedAt
+          : new Date(row.interactedAt as unknown as string),
+    }));
+
+    return { data: normalized, meta: { page, limit, total } };
   }
 }

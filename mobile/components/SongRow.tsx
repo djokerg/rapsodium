@@ -10,6 +10,7 @@ interface SongRowProps {
   isSaved: boolean;
   onToggleSave: () => void;
   onPress?: () => void;
+  meta?: string;
 }
 
 function formatDuration(seconds: number): string {
@@ -18,7 +19,7 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function SongRowInner({ song, isSaved, onToggleSave, onPress }: SongRowProps) {
+function SongRowInner({ song, isSaved, onToggleSave, onPress, meta }: SongRowProps) {
   const router = useRouter();
 
   const handlePress = (): void => {
@@ -51,6 +52,11 @@ function SongRowInner({ song, isSaved, onToggleSave, onPress }: SongRowProps) {
         <Text numberOfLines={1} className="mt-0.5 text-sm text-brand-100/60">
           {song.artist} · {formatDuration(song.durationSec)}
         </Text>
+        {meta ? (
+          <Text numberOfLines={1} className="mt-0.5 text-xs text-brand-100/40">
+            {meta}
+          </Text>
+        ) : null}
       </View>
       <Pressable
         onPress={onToggleSave}

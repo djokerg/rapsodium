@@ -76,7 +76,7 @@ export default function Home() {
         end={{ x: 1, y: 1 }}
         style={{ position: 'absolute', inset: 0 }}
       />
-      <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+      <SafeAreaView className="flex-1" edges={['top']}>
         <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
           <Text className="text-2xl font-bold text-white">For you</Text>
           <View className="flex-row" style={{ gap: 8 }}>

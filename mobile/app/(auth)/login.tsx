@@ -33,7 +33,7 @@ export default function Login() {
         body: { email: email.trim(), password },
       });
       await setToken(res.access_token);
-      router.replace('/(app)');
+      router.replace('/(app)/(tabs)');
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setError('Invalid email or password.');
