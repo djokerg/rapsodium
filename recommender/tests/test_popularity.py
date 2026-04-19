@@ -65,7 +65,7 @@ def test_ranks_by_weighted_score() -> None:
     assert [s.score for s in result] == [5.0, 1.0, 1.0, 0.0]
 
 
-def test_genre_filter_narrows_pool() -> None:
+def test_single_genre_filter_narrows_pool() -> None:
     interactions = _interactions_df(
         [
             (USER_1, SONG_A, "save"),  # rock
@@ -75,10 +75,28 @@ def test_genre_filter_narrows_pool() -> None:
     )
     rec = PopularityRecommender(interactions, _songs_df())
 
-    pop_only = rec.recommend(genre="pop", limit=10)
+    pop_only = rec.recommend(genres=["pop"], limit=10)
 
     assert {s.song_id for s in pop_only} == {SONG_C, SONG_D}
     assert pop_only[0].song_id == SONG_C  # higher score first
+
+
+def test_multi_genre_filter_unions_genres() -> None:
+    interactions = _interactions_df(
+        [
+            (USER_1, SONG_A, "save"),  # rock, +3
+            (USER_1, SONG_B, "play"),  # rock, +1
+            (USER_1, SONG_C, "save"),  # pop,  +3
+            (USER_1, SONG_D, "play"),  # pop,  +1
+        ]
+    )
+    rec = PopularityRecommender(interactions, _songs_df())
+
+    result = rec.recommend(genres=["rock", "pop"], limit=10)
+    assert {s.song_id for s in result} == {SONG_A, SONG_B, SONG_C, SONG_D}
+
+    empty_list_means_no_filter = rec.recommend(genres=[], limit=10)
+    assert len(empty_list_means_no_filter) == 4
 
 
 def test_user_id_excludes_all_seen_songs() -> None:

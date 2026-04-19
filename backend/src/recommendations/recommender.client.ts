@@ -12,7 +12,7 @@ export interface ScoredSong {
 
 export interface PopularityParams {
   readonly userId?: string;
-  readonly genre?: string;
+  readonly genres?: readonly string[];
   readonly limit: number;
 }
 
@@ -41,7 +41,7 @@ export class RecommenderClient {
       '/recommend/popularity',
       {
         user_id: params.userId,
-        genre: params.genre,
+        genres: params.genres,
         limit: params.limit,
       },
     );

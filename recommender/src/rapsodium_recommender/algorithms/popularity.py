@@ -69,7 +69,7 @@ class PopularityRecommender:
         self,
         *,
         user_id: UUID | None = None,
-        genre: str | None = None,
+        genres: list[str] | None = None,
         limit: int = 20,
     ) -> list[ScoredSong]:
         """Return the top ``limit`` songs by popularity, respecting filters."""
@@ -77,8 +77,8 @@ class PopularityRecommender:
             return []
 
         df = self._scores
-        if genre is not None:
-            df = df[df["genre"] == genre]
+        if genres:
+            df = df[df["genre"].isin(genres)]
 
         if user_id is not None and not self._interactions.empty:
             seen_mask = self._interactions["user_id"] == user_id

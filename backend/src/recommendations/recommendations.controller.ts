@@ -27,7 +27,6 @@ export class RecommendationsController {
     return this.recommendationsService.recommend({
       userId: req.user.id,
       algorithm: query.algorithm,
-      genre: query.genre,
       limit: query.limit,
     });
   }

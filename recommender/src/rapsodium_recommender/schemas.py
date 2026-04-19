@@ -14,9 +14,9 @@ class PopularityRequest(BaseModel):
         default=None,
         description="Exclude songs this user has already interacted with.",
     )
-    genre: str | None = Field(
+    genres: list[str] | None = Field(
         default=None,
-        description="Restrict recommendations to a single genre.",
+        description="Restrict recommendations to songs in any of these genres.",
     )
     limit: int = Field(default=20, ge=1, le=100)
 

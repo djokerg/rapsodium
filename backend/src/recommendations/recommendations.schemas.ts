@@ -10,7 +10,6 @@ const positiveInt = z
 
 export const recommendationsQuerySchema = z.object({
   algorithm: z.enum(ALGORITHMS).optional().default('popularity'),
-  genre: z.string().min(1).max(100).optional(),
   limit: positiveInt
     .pipe(z.number().max(50, 'Limit must be at most 50'))
     .optional()

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { DATABASE, type Database } from '../database/database.module.js';
-import { songs } from '../database/schema.js';
+import { songs, userPreferences } from '../database/schema.js';
 import type { SongSummary } from '../songs/songs.types.js';
 import { RecommenderClient, type ScoredSong } from './recommender.client.js';
 import type { Algorithm } from './recommendations.schemas.js';
@@ -14,7 +14,6 @@ export interface RecommendationResult {
 interface RecommendParams {
   userId: string;
   algorithm: Algorithm;
-  genre?: string;
   limit: number;
 }
 
@@ -59,14 +58,24 @@ export class RecommendationsService {
     return { algorithm: params.algorithm, data };
   }
 
-  private callAlgorithm(params: RecommendParams): Promise<ScoredSong[]> {
+  private async callAlgorithm(params: RecommendParams): Promise<ScoredSong[]> {
     switch (params.algorithm) {
-      case 'popularity':
+      case 'popularity': {
+        const genres = await this.getUserGenres(params.userId);
         return this.recommender.popularity({
           userId: params.userId,
-          genre: params.genre,
+          genres: genres.length > 0 ? genres : undefined,
           limit: params.limit,
         });
+      }
     }
+  }
+
+  private async getUserGenres(userId: string): Promise<string[]> {
+    const rows = await this.db
+      .select({ genre: userPreferences.genre })
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId));
+    return rows.map((row) => row.genre);
   }
 }

@@ -41,8 +41,8 @@ def health() -> HealthResponse:
 def recommend_popularity(request: PopularityRequest) -> PopularityResponse:
     """Top-N songs by weighted popularity (3*save + 1*play - 1*skip).
 
-    Filters: optional ``genre`` narrows the pool; optional ``user_id`` hides
-    songs the user has already interacted with.
+    Filters: optional ``genres`` narrows the pool to songs in any of them;
+    optional ``user_id`` hides songs the user has already interacted with.
     """
     interactions = load_interactions_df()
     songs = load_songs_df()
@@ -50,7 +50,7 @@ def recommend_popularity(request: PopularityRequest) -> PopularityResponse:
 
     scored = recommender.recommend(
         user_id=request.user_id,
-        genre=request.genre,
+        genres=request.genres,
         limit=request.limit,
     )
     return PopularityResponse(

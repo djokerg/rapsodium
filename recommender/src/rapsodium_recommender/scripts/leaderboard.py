@@ -7,7 +7,8 @@ Usage::
 
     poetry run leaderboard                     # top 20 overall
     poetry run leaderboard --limit 10
-    poetry run leaderboard --genre Rock
+    poetry run leaderboard --genres Rock
+    poetry run leaderboard --genres "Rock,Pop"
     poetry run leaderboard --user-id <uuid>    # exclude that user's seen songs
 """
 
@@ -55,7 +56,12 @@ def _render_table(rows: pd.DataFrame) -> str:
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Print the popularity-based leaderboard.")
     parser.add_argument("--limit", type=int, default=20, help="Top-N to show (default 20).")
-    parser.add_argument("--genre", type=str, default=None, help="Restrict to a single genre.")
+    parser.add_argument(
+        "--genres",
+        type=str,
+        default=None,
+        help="Restrict to songs in any of these genres (comma-separated).",
+    )
     parser.add_argument(
         "--user-id",
         type=str,
@@ -73,7 +79,8 @@ def main(argv: list[str] | None = None) -> int:
     recommender = PopularityRecommender(interactions=interactions, songs=songs)
 
     user_id = UUID(args.user_id) if args.user_id else None
-    scored = recommender.recommend(user_id=user_id, genre=args.genre, limit=args.limit)
+    genres = [g.strip() for g in args.genres.split(",") if g.strip()] if args.genres else None
+    scored = recommender.recommend(user_id=user_id, genres=genres, limit=args.limit)
 
     scored_df = pd.DataFrame([{"song_id": item.song_id, "score": item.score} for item in scored])
 
@@ -87,11 +94,11 @@ def main(argv: list[str] | None = None) -> int:
     table.insert(0, "rank", range(1, len(table) + 1))
 
     filter_parts = []
-    if args.genre:
-        filter_parts.append(f"genre={args.genre}")
+    if genres:
+        filter_parts.append(f"genres={', '.join(genres)}")
     if args.user_id:
         filter_parts.append(f"excluding user={args.user_id}")
-    suffix = f" ({', '.join(filter_parts)})" if filter_parts else ""
+    suffix = f" ({'; '.join(filter_parts)})" if filter_parts else ""
 
     print(f"Popularity leaderboard — top {len(table)}{suffix}")
     print(f"Scoring: 3*save + 1*play - 1*skip  ({len(interactions)} interactions seen)")
