@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { SongsModule } from './songs/songs.module.js';
 import { InteractionsModule } from './interactions/interactions.module.js';
+import { RecommendationsModule } from './recommendations/recommendations.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { InteractionsModule } from './interactions/interactions.module.js';
     UsersModule,
     SongsModule,
     InteractionsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

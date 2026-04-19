@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SongRow } from '@/components/SongRow';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
-import { useSongs } from '@/hooks/useSongs';
+import { useRecommendations } from '@/hooks/useRecommendations';
 import { useToggleSave } from '@/hooks/useToggleSave';
 import { useAuthStore } from '@/stores/auth.store';
 import { usePlayerStore } from '@/stores/player.store';
@@ -28,21 +28,12 @@ export default function Home() {
     await clearToken();
     router.replace('/');
   };
-  const {
-    data,
-    isLoading,
-    isRefetching,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-    error,
-  } = useSongs();
+
+  const { data, isLoading, isRefetching, refetch, error } = useRecommendations();
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
 
-  const songs: SongSummary[] =
-    data?.pages.flatMap((page) => page.data) ?? [];
+  const songs: SongSummary[] = data?.data ?? [];
 
   const renderItem = useCallback(
     ({ item }: { item: SongSummary }) => {
@@ -61,12 +52,6 @@ export default function Home() {
     },
     [favoriteIds, toggleSave, setQueue, router],
   );
-
-  const onEndReached = useCallback((): void => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <View className="flex-1 bg-ink-950">
@@ -111,7 +96,10 @@ export default function Home() {
         ) : error ? (
           <View className="flex-1 items-center justify-center px-8">
             <Text className="text-center text-base text-rose-200">
-              Couldn&apos;t load songs.
+              Couldn&apos;t load recommendations.
+            </Text>
+            <Text className="mt-2 text-center text-sm text-brand-100/60">
+              Make sure the recommender service is running.
             </Text>
             <Pressable
               onPress={() => void refetch()}
@@ -125,26 +113,17 @@ export default function Home() {
             data={songs}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
-            onEndReached={onEndReached}
-            onEndReachedThreshold={0.5}
             refreshControl={
               <RefreshControl
-                refreshing={isRefetching && !isFetchingNextPage}
+                refreshing={isRefetching}
                 onRefresh={() => void refetch()}
                 tintColor="#67e8f9"
               />
             }
-            ListFooterComponent={
-              isFetchingNextPage ? (
-                <View className="py-6">
-                  <ActivityIndicator color="#67e8f9" />
-                </View>
-              ) : null
-            }
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center px-8 pt-24">
                 <Text className="text-center text-base text-brand-100/70">
-                  No songs yet.
+                  No recommendations yet. Try saving or playing a few songs.
                 </Text>
               </View>
             }

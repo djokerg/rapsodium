@@ -69,13 +69,13 @@ Generate synthetic user interactions so the recommendation algorithms and evalua
 
 Implement the three recommendation algorithms in Python.
 
-- [ ] Initialize Python project (dependencies: pandas, scikit-learn, numpy)
-- [ ] Set up communication layer between NestJS and Python (FastAPI microservice or subprocess)
-- [ ] **Popularity-based** — recommend globally popular songs (based on play count, like count)
+- [x] Initialize Python project (dependencies: pandas, scikit-learn, numpy)
+- [x] Set up communication layer between NestJS and Python (FastAPI microservice or subprocess)
+- [x] **Popularity-based** — recommend globally popular songs (based on play count, like count)
 - [ ] **Content-based** — recommend songs similar to user's liked songs (using song metadata features)
 - [ ] **Collaborative filtering** — recommend songs based on similar users' interaction patterns
-- [ ] Expose recommendation results via backend API endpoint (GET /recommendations)
-- [ ] Connect recommendations to mobile app home screen
+- [x] Expose recommendation results via backend API endpoint (GET /recommendations)
+- [x] Connect recommendations to mobile app home screen
 
 ---
 
