@@ -1,0 +1,71 @@
+[tool.poetry]
+name = "rapsodium-recommender"
+version = "0.1.0"
+description = "Music recommendation service for Rapsodium (popularity, content-based, collaborative filtering)."
+authors = ["Djordje Grebovic <djordje.grebovic@aparteko.com>"]
+readme = "README.md"
+packages = [{ include = "rapsodium_recommender", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = "^2.2"
+numpy = "^2.0"
+scikit-learn = "^1.5"
+fastapi = "^0.115"
+uvicorn = { extras = ["standard"], version = "^0.32" }
+psycopg = { extras = ["binary"], version = "^3.2" }
+pydantic = "^2.9"
+pydantic-settings = "^2.6"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.7"
+mypy = "^1.13"
+pytest = "^8.3"
+
+[tool.poetry.scripts]
+dev = "rapsodium_recommender.main:run_dev"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "W",   # pycodestyle warnings
+  "I",   # isort
+  "N",   # pep8-naming
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "A",   # flake8-builtins
+  "C4",  # flake8-comprehensions
+  "RUF", # ruff-specific rules
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "pandas.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
