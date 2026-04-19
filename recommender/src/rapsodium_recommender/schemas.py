@@ -21,6 +21,17 @@ class PopularityRequest(BaseModel):
     limit: int = Field(default=20, ge=1, le=100)
 
 
+class PersonalizedRequest(BaseModel):
+    """Common request shape for algorithms that require a user identity."""
+
+    user_id: UUID = Field(description="Target user — required for personalization.")
+    genres: list[str] | None = Field(
+        default=None,
+        description="Restrict recommendations to songs in any of these genres.",
+    )
+    limit: int = Field(default=20, ge=1, le=100)
+
+
 class Recommendation(BaseModel):
     song_id: UUID
     score: float
@@ -28,4 +39,14 @@ class Recommendation(BaseModel):
 
 class PopularityResponse(BaseModel):
     algorithm: str = "popularity"
+    recommendations: list[Recommendation]
+
+
+class ContentResponse(BaseModel):
+    algorithm: str = "content"
+    recommendations: list[Recommendation]
+
+
+class CollaborativeResponse(BaseModel):
+    algorithm: str = "collaborative"
     recommendations: list[Recommendation]

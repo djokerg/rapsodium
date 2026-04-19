@@ -18,7 +18,6 @@ import {
 import { SongRow } from '@/components/SongRow';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
 import {
-  isAlgorithmImplemented,
   useRecommendations,
   type Algorithm,
 } from '@/hooks/useRecommendations';
@@ -33,21 +32,17 @@ const OPTIONS: readonly AlgorithmOption<Algorithm>[] = [
   { value: 'collaborative', label: 'Your crowd loves' },
 ];
 
-const COPY: Record<Algorithm, { tagline: string; comingSoon: string }> = {
-  popularity: {
-    tagline: 'Global favorites, filtered to your picked genres.',
-    comingSoon: '',
-  },
-  content: {
-    tagline: 'Picked from your saved songs.',
-    comingSoon:
-      'We\u2019ll find songs with a similar feel — tempo, energy, mood — to the tracks you\u2019ve saved.',
-  },
-  collaborative: {
-    tagline: 'From listeners with a taste like yours.',
-    comingSoon:
-      'We\u2019ll match you with listeners who save the same songs, and surface what they love that you haven\u2019t heard yet.',
-  },
+const TAGLINES: Record<Algorithm, string> = {
+  popularity: 'Global favorites, filtered to your picked genres.',
+  content: 'Picked by the feel of songs you\u2019ve saved.',
+  collaborative: 'From listeners with a taste like yours.',
+};
+
+const EMPTY_COPY: Record<Algorithm, string> = {
+  popularity: 'No recommendations yet. Try saving or playing a few songs.',
+  content: 'Save a few songs you love — we need them to pick similar tracks.',
+  collaborative:
+    'Play and save a few songs so we can match you with other listeners.',
 };
 
 export default function Home() {
@@ -87,25 +82,7 @@ export default function Home() {
     [favoriteIds, toggleSave, setQueue, router, songs],
   );
 
-  const implemented = isAlgorithmImplemented(algorithm);
-
   const renderBody = () => {
-    if (!implemented) {
-      return (
-        <View className="flex-1 items-center justify-center px-8">
-          <View className="h-16 w-16 items-center justify-center rounded-full bg-white/10">
-            <Ionicons name="sparkles-outline" size={28} color="#67e8f9" />
-          </View>
-          <Text className="mt-4 text-center text-lg font-semibold text-white">
-            Coming soon
-          </Text>
-          <Text className="mt-2 text-center text-sm text-brand-100/70">
-            {COPY[algorithm].comingSoon}
-          </Text>
-        </View>
-      );
-    }
-
     if (isLoading) {
       return (
         <View className="flex-1 items-center justify-center">
@@ -148,7 +125,7 @@ export default function Home() {
         ListEmptyComponent={
           <View className="flex-1 items-center justify-center px-8 pt-24">
             <Text className="text-center text-base text-brand-100/70">
-              No recommendations yet. Try saving or playing a few songs.
+              {EMPTY_COPY[algorithm]}
             </Text>
           </View>
         }
@@ -196,7 +173,7 @@ export default function Home() {
           numberOfLines={1}
           className="px-4 pb-2 text-xs text-brand-100/60"
         >
-          {COPY[algorithm].tagline}
+          {TAGLINES[algorithm]}
         </Text>
 
         <AlgorithmPicker

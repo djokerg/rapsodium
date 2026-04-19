@@ -16,7 +16,13 @@ export interface PopularityParams {
   readonly limit: number;
 }
 
-interface PopularityResponseBody {
+export interface PersonalizedParams {
+  readonly userId: string;
+  readonly genres?: readonly string[];
+  readonly limit: number;
+}
+
+interface RecommendResponseBody {
   algorithm: string;
   recommendations: Array<{
     song_id: string;
@@ -36,16 +42,35 @@ export class RecommenderClient {
       config.get<string>('RECOMMENDER_URL') ?? 'http://localhost:8000';
   }
 
-  async popularity(params: PopularityParams): Promise<ScoredSong[]> {
-    const body = await this.post<PopularityResponseBody>(
-      '/recommend/popularity',
-      {
-        user_id: params.userId,
-        genres: params.genres,
-        limit: params.limit,
-      },
-    );
+  popularity(params: PopularityParams): Promise<ScoredSong[]> {
+    return this.call('/recommend/popularity', {
+      user_id: params.userId,
+      genres: params.genres,
+      limit: params.limit,
+    });
+  }
 
+  content(params: PersonalizedParams): Promise<ScoredSong[]> {
+    return this.call('/recommend/content', {
+      user_id: params.userId,
+      genres: params.genres,
+      limit: params.limit,
+    });
+  }
+
+  collaborative(params: PersonalizedParams): Promise<ScoredSong[]> {
+    return this.call('/recommend/collaborative', {
+      user_id: params.userId,
+      genres: params.genres,
+      limit: params.limit,
+    });
+  }
+
+  private async call(
+    path: string,
+    payload: unknown,
+  ): Promise<ScoredSong[]> {
+    const body = await this.post<RecommendResponseBody>(path, payload);
     return body.recommendations.map((item) => ({
       songId: item.song_id,
       score: item.score,

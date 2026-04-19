@@ -6,12 +6,6 @@ const LIMIT = 50;
 
 export type Algorithm = 'popularity' | 'content' | 'collaborative';
 
-// Backend only implements 'popularity' in Phase A; the other two are UI stubs.
-const IMPLEMENTED: ReadonlySet<Algorithm> = new Set(['popularity']);
-
-export const isAlgorithmImplemented = (algorithm: Algorithm): boolean =>
-  IMPLEMENTED.has(algorithm);
-
 interface RecommendationsResponse {
   algorithm: Algorithm;
   data: SongSummary[];
@@ -27,6 +21,5 @@ export function useRecommendations(algorithm: Algorithm) {
       apiFetch<RecommendationsResponse>(
         `/recommendations?algorithm=${algorithm}&limit=${LIMIT}`,
       ),
-    enabled: isAlgorithmImplemented(algorithm),
   });
 }

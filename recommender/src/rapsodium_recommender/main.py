@@ -1,11 +1,18 @@
 from fastapi import FastAPI
 
-from .algorithms import PopularityRecommender
+from .algorithms import (
+    CollaborativeRecommender,
+    ContentBasedRecommender,
+    PopularityRecommender,
+)
 from .config import get_settings
 from .data import load_interactions_df, load_songs_df
 from .db import get_connection
 from .schemas import (
+    CollaborativeResponse,
+    ContentResponse,
     HealthResponse,
+    PersonalizedRequest,
     PopularityRequest,
     PopularityResponse,
     Recommendation,
@@ -54,6 +61,48 @@ def recommend_popularity(request: PopularityRequest) -> PopularityResponse:
         limit=request.limit,
     )
     return PopularityResponse(
+        recommendations=[Recommendation(song_id=item.song_id, score=item.score) for item in scored],
+    )
+
+
+@app.post("/recommend/content", response_model=ContentResponse)
+def recommend_content(request: PersonalizedRequest) -> ContentResponse:
+    """Songs similar (in audio features + genre) to the user's saved songs.
+
+    Returns an empty list for cold-start users (no saves on record).
+    """
+    interactions = load_interactions_df()
+    songs = load_songs_df()
+    recommender = ContentBasedRecommender(songs=songs, interactions=interactions)
+
+    scored = recommender.recommend(
+        user_id=request.user_id,
+        genres=request.genres,
+        limit=request.limit,
+    )
+    return ContentResponse(
+        recommendations=[Recommendation(song_id=item.song_id, score=item.score) for item in scored],
+    )
+
+
+@app.post("/recommend/collaborative", response_model=CollaborativeResponse)
+def recommend_collaborative(request: PersonalizedRequest) -> CollaborativeResponse:
+    """Item-based collaborative filter.
+
+    Songs scored by aggregate similarity to what the target user has already
+    engaged with. Returns an empty list for users not present in the training
+    interactions.
+    """
+    interactions = load_interactions_df()
+    songs = load_songs_df()
+    recommender = CollaborativeRecommender(interactions=interactions, songs=songs)
+
+    scored = recommender.recommend(
+        user_id=request.user_id,
+        genres=request.genres,
+        limit=request.limit,
+    )
+    return CollaborativeResponse(
         recommendations=[Recommendation(song_id=item.song_id, score=item.score) for item in scored],
     )
 

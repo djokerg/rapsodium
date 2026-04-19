@@ -25,6 +25,7 @@ pytest = "^8.3"
 [tool.poetry.scripts]
 dev = "rapsodium_recommender.main:run_dev"
 leaderboard = "rapsodium_recommender.scripts.leaderboard:main"
+seed-audio-features = "rapsodium_recommender.scripts.seed_audio_features:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

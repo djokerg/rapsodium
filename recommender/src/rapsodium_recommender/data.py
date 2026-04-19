@@ -33,14 +33,15 @@ def load_interactions_df() -> pd.DataFrame:
 def load_songs_df() -> pd.DataFrame:
     """Return the song catalogue as a DataFrame.
 
-    Columns: id (UUID), title, artist, genre, duration_sec.
-    Audio features (tempo/energy/...) are omitted here; the content-based
-    recommender will load them itself when it lands.
+    Columns: id (UUID), title, artist, genre, duration_sec,
+    tempo, energy, danceability, valence (the last four can be NULL if
+    `seed-audio-features` has not been run).
     """
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, title, artist, genre, duration_sec
+            SELECT id, title, artist, genre, duration_sec,
+                   tempo, energy, danceability, valence
             FROM songs
             """
         )

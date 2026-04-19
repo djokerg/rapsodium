@@ -72,8 +72,8 @@ Implement the three recommendation algorithms in Python.
 - [x] Initialize Python project (dependencies: pandas, scikit-learn, numpy)
 - [x] Set up communication layer between NestJS and Python (FastAPI microservice or subprocess)
 - [x] **Popularity-based** — recommend globally popular songs (based on play count, like count)
-- [ ] **Content-based** — recommend songs similar to user's liked songs (using song metadata features)
-- [ ] **Collaborative filtering** — recommend songs based on similar users' interaction patterns
+- [x] **Content-based** — recommend songs similar to user's liked songs (using song metadata features)
+- [x] **Collaborative filtering** — recommend songs based on similar users' interaction patterns
 - [x] Expose recommendation results via backend API endpoint (GET /recommendations)
 - [x] Connect recommendations to mobile app home screen
 

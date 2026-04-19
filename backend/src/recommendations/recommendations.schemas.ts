@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const ALGORITHMS = ['popularity'] as const;
+export const ALGORITHMS = ['popularity', 'content', 'collaborative'] as const;
 export type Algorithm = (typeof ALGORITHMS)[number];
 
 const positiveInt = z

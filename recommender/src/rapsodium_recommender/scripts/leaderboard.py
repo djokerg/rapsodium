@@ -1,13 +1,14 @@
-"""Print the current popularity leaderboard.
+"""Print the current recommender leaderboard for a given algorithm.
 
-Useful for validating that the mobile "For you" feed matches what the
-algorithm actually ranks, and as a demo artifact for the thesis defense.
+Useful for validating that the mobile feed matches what the algorithm actually
+ranks, and as a demo artifact for the thesis defense.
 
 Usage::
 
-    poetry run leaderboard                     # top 20 overall
-    poetry run leaderboard --limit 10
-    poetry run leaderboard --genres Rock
+    poetry run leaderboard                                      # popularity, top 20
+    poetry run leaderboard --algorithm content --user-id <uuid>
+    poetry run leaderboard --algorithm collaborative --user-id <uuid>
+    poetry run leaderboard --algorithm popularity --genres Rock
     poetry run leaderboard --genres "Rock,Pop"
     poetry run leaderboard --user-id <uuid>    # exclude that user's seen songs
 """
@@ -19,8 +20,15 @@ from uuid import UUID
 
 import pandas as pd
 
-from ..algorithms import PopularityRecommender
+from ..algorithms import (
+    CollaborativeRecommender,
+    ContentBasedRecommender,
+    PopularityRecommender,
+    ScoredSong,
+)
 from ..data import load_interactions_df, load_songs_df
+
+ALGORITHM_CHOICES = ("popularity", "content", "collaborative")
 
 
 def _truncate(value: str, width: int) -> str:
@@ -45,7 +53,7 @@ def _render_table(rows: pd.DataFrame) -> str:
     for _, row in rows.iterrows():
         lines.append(
             f"{int(row['rank']):>{widths['rank']}}  "
-            f"{row['score']:>{widths['score']}.2f}  "
+            f"{row['score']:>{widths['score']}.3f}  "
             f"{_truncate(str(row['title']), widths['title']):<{widths['title']}}  "
             f"{_truncate(str(row['artist']), widths['artist']):<{widths['artist']}}  "
             f"{_truncate(str(row['genre']), widths['genre']):<{widths['genre']}}"
@@ -54,7 +62,13 @@ def _render_table(rows: pd.DataFrame) -> str:
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Print the popularity-based leaderboard.")
+    parser = argparse.ArgumentParser(description="Print a recommender leaderboard.")
+    parser.add_argument(
+        "--algorithm",
+        choices=ALGORITHM_CHOICES,
+        default="popularity",
+        help="Which algorithm to run (default: popularity).",
+    )
     parser.add_argument("--limit", type=int, default=20, help="Top-N to show (default 20).")
     parser.add_argument(
         "--genres",
@@ -66,9 +80,39 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--user-id",
         type=str,
         default=None,
-        help="Exclude songs the given user has already interacted with.",
+        help="User id (required for content / collaborative).",
     )
     return parser.parse_args(argv)
+
+
+def _run_algorithm(
+    algorithm: str,
+    *,
+    user_id: UUID | None,
+    genres: list[str] | None,
+    limit: int,
+    interactions: pd.DataFrame,
+    songs: pd.DataFrame,
+) -> list[ScoredSong]:
+    if algorithm == "popularity":
+        return PopularityRecommender(interactions=interactions, songs=songs).recommend(
+            user_id=user_id, genres=genres, limit=limit
+        )
+
+    if user_id is None:
+        raise SystemExit(f"--user-id is required for algorithm={algorithm!r}")
+
+    if algorithm == "content":
+        return ContentBasedRecommender(songs=songs, interactions=interactions).recommend(
+            user_id=user_id, genres=genres, limit=limit
+        )
+
+    if algorithm == "collaborative":
+        return CollaborativeRecommender(interactions=interactions, songs=songs).recommend(
+            user_id=user_id, genres=genres, limit=limit
+        )
+
+    raise SystemExit(f"unknown algorithm: {algorithm!r}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -76,11 +120,18 @@ def main(argv: list[str] | None = None) -> int:
 
     interactions = load_interactions_df()
     songs = load_songs_df()
-    recommender = PopularityRecommender(interactions=interactions, songs=songs)
 
     user_id = UUID(args.user_id) if args.user_id else None
     genres = [g.strip() for g in args.genres.split(",") if g.strip()] if args.genres else None
-    scored = recommender.recommend(user_id=user_id, genres=genres, limit=args.limit)
+
+    scored = _run_algorithm(
+        args.algorithm,
+        user_id=user_id,
+        genres=genres,
+        limit=args.limit,
+        interactions=interactions,
+        songs=songs,
+    )
 
     scored_df = pd.DataFrame([{"song_id": item.song_id, "score": item.score} for item in scored])
 
@@ -88,20 +139,19 @@ def main(argv: list[str] | None = None) -> int:
         print("(no results)")
         return 0
 
-    # Hydrate title/artist/genre from the songs DataFrame; preserve recommender order.
     catalogue = songs[["id", "title", "artist", "genre"]].rename(columns={"id": "song_id"})
     table = scored_df.merge(catalogue, on="song_id", how="left")
     table.insert(0, "rank", range(1, len(table) + 1))
 
-    filter_parts = []
+    filter_parts = [f"algorithm={args.algorithm}"]
     if genres:
         filter_parts.append(f"genres={', '.join(genres)}")
     if args.user_id:
-        filter_parts.append(f"excluding user={args.user_id}")
-    suffix = f" ({'; '.join(filter_parts)})" if filter_parts else ""
+        filter_parts.append(f"user={args.user_id}")
+    suffix = f" ({'; '.join(filter_parts)})"
 
-    print(f"Popularity leaderboard — top {len(table)}{suffix}")
-    print(f"Scoring: 3*save + 1*play - 1*skip  ({len(interactions)} interactions seen)")
+    print(f"Leaderboard — top {len(table)}{suffix}")
+    print(f"Catalogue: {len(songs)} songs, {len(interactions)} interactions")
     print()
     print(_render_table(table))
     return 0

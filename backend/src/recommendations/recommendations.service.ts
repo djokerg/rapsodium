@@ -59,15 +59,28 @@ export class RecommendationsService {
   }
 
   private async callAlgorithm(params: RecommendParams): Promise<ScoredSong[]> {
+    const genres = await this.getUserGenres(params.userId);
+    const genreFilter = genres.length > 0 ? genres : undefined;
+
     switch (params.algorithm) {
-      case 'popularity': {
-        const genres = await this.getUserGenres(params.userId);
+      case 'popularity':
         return this.recommender.popularity({
           userId: params.userId,
-          genres: genres.length > 0 ? genres : undefined,
+          genres: genreFilter,
           limit: params.limit,
         });
-      }
+      case 'content':
+        return this.recommender.content({
+          userId: params.userId,
+          genres: genreFilter,
+          limit: params.limit,
+        });
+      case 'collaborative':
+        return this.recommender.collaborative({
+          userId: params.userId,
+          genres: genreFilter,
+          limit: params.limit,
+        });
     }
   }
 
