@@ -51,6 +51,7 @@ export default function SongDetail() {
       ? queue[currentIdx + 1]
       : null;
 
+  const sessionStartRef = useRef(0);
   const sessionMaxRef = useRef(0);
   const sessionOpenRef = useRef(false);
   const recordPlayMutate = recordPlay.mutate;
@@ -63,8 +64,9 @@ export default function SongDetail() {
 
   const reportAndCloseSession = (): void => {
     if (!sessionOpenRef.current) return;
-    const listened = sessionMaxRef.current;
+    const listened = sessionMaxRef.current - sessionStartRef.current;
     sessionOpenRef.current = false;
+    sessionStartRef.current = 0;
     sessionMaxRef.current = 0;
     if (id && listened >= 1) {
       recordPlayMutate({ songId: id, listenedSeconds: listened });
@@ -91,9 +93,12 @@ export default function SongDetail() {
       player.pause();
       reportAndCloseSession();
     } else {
+      const startFrom = status.didJustFinish ? 0 : positionSec;
       if (status.didJustFinish) {
         player.seekTo(0);
       }
+      sessionStartRef.current = startFrom;
+      sessionMaxRef.current = startFrom;
       sessionOpenRef.current = true;
       player.play();
     }
