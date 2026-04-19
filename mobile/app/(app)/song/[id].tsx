@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
-import { useRecordPlay } from '@/hooks/useRecordPlay';
+import { useRecordInteraction } from '@/hooks/useRecordInteraction';
 import { useSong } from '@/hooks/useSong';
 import { useToggleSave } from '@/hooks/useToggleSave';
 import { usePlayerStore } from '@/stores/player.store';
@@ -26,7 +26,7 @@ export default function SongDetail() {
   const { data: song, isLoading, error } = useSong(id);
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
-  const recordPlay = useRecordPlay();
+  const recordInteraction = useRecordInteraction();
   const queue = usePlayerStore((s) => s.queue);
 
   const source = useMemo(
@@ -54,7 +54,7 @@ export default function SongDetail() {
   const sessionStartRef = useRef(0);
   const sessionMaxRef = useRef(0);
   const sessionOpenRef = useRef(false);
-  const recordPlayMutate = recordPlay.mutate;
+  const recordInteractionMutate = recordInteraction.mutate;
 
   useEffect(() => {
     if (sessionOpenRef.current && positionSec > sessionMaxRef.current) {
@@ -62,14 +62,18 @@ export default function SongDetail() {
     }
   }, [positionSec]);
 
-  const reportAndCloseSession = (): void => {
+  const reportAndCloseSession = (eventType: 'play' | 'skip' = 'play'): void => {
     if (!sessionOpenRef.current) return;
     const listened = sessionMaxRef.current - sessionStartRef.current;
     sessionOpenRef.current = false;
     sessionStartRef.current = 0;
     sessionMaxRef.current = 0;
     if (id && listened >= 1) {
-      recordPlayMutate({ songId: id, listenedSeconds: listened });
+      recordInteractionMutate({
+        songId: id,
+        eventType,
+        listenedSeconds: listened,
+      });
     }
   };
 
@@ -105,7 +109,12 @@ export default function SongDetail() {
   };
 
   const navigateTo = (targetId: string): void => {
-    reportAndCloseSession();
+    const finished = status.didJustFinish;
+    const listened = sessionMaxRef.current - sessionStartRef.current;
+    const halfDuration = durationSec > 0 ? durationSec / 2 : 0;
+    const isSkip =
+      sessionOpenRef.current && !finished && listened < halfDuration;
+    reportAndCloseSession(isSkip ? 'skip' : 'play');
     router.replace(`/song/${targetId}`);
   };
 

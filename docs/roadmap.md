@@ -59,9 +59,9 @@ Build the React Native / Expo mobile application with all core screens.
 
 Generate synthetic user interactions so the recommendation algorithms and evaluation have sufficient data to work with. This must happen before building the recommenders.
 
-- [ ] Write a script to create synthetic users with varied genre preferences
-- [ ] Generate realistic interaction patterns (plays, likes, skips, saves) across the song catalog
-- [ ] Verify data volume is sufficient for collaborative filtering and evaluation metrics
+- [x] Write a script to create synthetic users with varied genre preferences
+- [x] Generate realistic interaction patterns (plays, likes, skips, saves) across the song catalog
+- [x] Verify data volume is sufficient for collaborative filtering and evaluation metrics
 
 ---
 
