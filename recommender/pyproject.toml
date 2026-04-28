@@ -16,6 +16,9 @@ uvicorn = { extras = ["standard"], version = "^0.32" }
 psycopg = { extras = ["binary"], version = "^3.2" }
 pydantic = "^2.9"
 pydantic-settings = "^2.6"
+# Essentia ships only as pre-release wheels (2.1bN.devM) on PyPI; allow-prereleases
+# is required for Poetry to pick them up. The exact version is pinned in poetry.lock.
+essentia = { version = "*", allow-prereleases = true }
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.7"
@@ -26,6 +29,7 @@ pytest = "^8.3"
 dev = "rapsodium_recommender.main:run_dev"
 leaderboard = "rapsodium_recommender.scripts.leaderboard:main"
 seed-audio-features = "rapsodium_recommender.scripts.seed_audio_features:main"
+extract-audio-features = "rapsodium_recommender.scripts.extract_audio_features:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -65,7 +69,7 @@ warn_unused_ignores = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["sklearn.*", "pandas.*"]
+module = ["sklearn.*", "pandas.*", "essentia.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
