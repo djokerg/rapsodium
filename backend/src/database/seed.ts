@@ -7,18 +7,23 @@ import { resolve } from 'path';
 
 const SEED_DATA_PATH = resolve(process.cwd(), 'seed-data.json');
 
-const GENRES = [
-  'pop',
-  'rock',
-  'hip hop',
-  'r&b',
-  'electronic',
-  'jazz',
-  'classical',
-  'latin',
-  'metal',
-  'country',
-];
+// Deezer genre IDs (from https://api.deezer.com/genre).
+// Used with /chart/{id}/tracks to fetch the most popular tracks per genre.
+// Note: this endpoint is geo-IP localized, so the chart reflects what's
+// popular in the seeder's region — that's intentional here, since we want
+// songs Serbian test users will recognize.
+const GENRES: Record<string, number> = {
+  pop: 132,
+  rock: 152,
+  'hip hop': 116,
+  'r&b': 165,
+  electronic: 106,
+  jazz: 129,
+  classical: 98,
+  latin: 197,
+  metal: 464,
+  country: 84,
+};
 
 const TRACKS_PER_GENRE = 50;
 
@@ -31,9 +36,9 @@ interface DeezerTrack {
   album: { title: string; cover_big: string };
 }
 
-interface DeezerSearchResponse {
+interface DeezerChartResponse {
   data?: DeezerTrack[];
-  total: number;
+  total?: number;
 }
 
 interface SeedSong {
@@ -47,23 +52,24 @@ interface SeedSong {
   coverUrl: string;
 }
 
-async function fetchDeezerTracks(
+async function fetchTopTracksForGenre(
   genre: string,
+  genreId: number,
   limit: number,
 ): Promise<SeedSong[]> {
-  const url = `https://api.deezer.com/search?q=genre:"${encodeURIComponent(genre)}"&limit=${limit}`;
+  const url = `https://api.deezer.com/chart/${genreId}/tracks?limit=${limit}`;
 
   const response = await fetch(url);
 
   if (!response.ok) {
-    console.warn(`Failed to fetch genre "${genre}": ${response.status}`);
+    console.warn(`Failed to fetch chart for "${genre}": ${response.status}`);
     return [];
   }
 
-  const data = (await response.json()) as DeezerSearchResponse;
+  const data = (await response.json()) as DeezerChartResponse;
 
   if (!data.data) {
-    console.warn(`No data for genre "${genre}"`);
+    console.warn(`No chart data for genre "${genre}"`);
     return [];
   }
 
@@ -84,10 +90,11 @@ async function fetchDeezerTracks(
 async function fetchAllSongs(): Promise<SeedSong[]> {
   const allSongs: SeedSong[] = [];
   const seenIds = new Set<number>();
+  const genreEntries = Object.entries(GENRES);
 
-  for (const genre of GENRES) {
-    console.log(`Fetching "${genre}"...`);
-    const tracks = await fetchDeezerTracks(genre, TRACKS_PER_GENRE);
+  for (const [genre, genreId] of genreEntries) {
+    console.log(`Fetching top "${genre}" tracks...`);
+    const tracks = await fetchTopTracksForGenre(genre, genreId, TRACKS_PER_GENRE);
 
     for (const track of tracks) {
       if (!seenIds.has(track.deezerId)) {
@@ -101,7 +108,7 @@ async function fetchAllSongs(): Promise<SeedSong[]> {
   }
 
   console.log(
-    `Fetched ${allSongs.length} unique songs across ${GENRES.length} genres`,
+    `Fetched ${allSongs.length} unique songs across ${genreEntries.length} genres`,
   );
   return allSongs;
 }
