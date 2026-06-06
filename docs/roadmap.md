@@ -99,11 +99,11 @@ they're doing or the vibe they want (in natural language), and recommendations a
 real time; the same chat lets the user fine-tune the algorithm (boost a genre, exclude an
 artist, push toward less mainstream). See [assistant.md](./assistant.md) for the detailed design.
 
-- [ ] Backend `assistant` module — stateless `POST /assistant/message` (no DB tables)
-- [ ] OpenAI integration (`openai` SDK, structured output) — NL → `VibeProfile` patch
-- [ ] `mergeVibeProfile` patch-merge logic + `validate` (clamp/sanitize) + unit tests
-- [ ] Recommender `contextual` endpoint (vibe ⊕ taste, filters, genre boosts, mainstream skew)
-- [ ] Mobile chat screen — in-memory VibeProfile, live recommendation strip + filter chips
+- [x] Backend `assistant` module — stateless `POST /assistant/message` (no DB tables)
+- [x] OpenAI integration (`openai` SDK, structured output) — NL → `VibeProfile` patch
+- [x] `mergeVibeProfile` patch-merge logic + `clampProfile` (clamp/sanitize) + unit tests
+- [x] Recommender `contextual` endpoint (vibe ⊕ taste, filters, genre boosts, mainstream skew)
+- [x] Mobile chat screen — in-memory VibeProfile, live recommendation strip + filter chips
 
 ---
 

@@ -106,6 +106,14 @@ export interface VibeProfile {
   /** Multiplicative ranking boosts per genre. >1 boost, <1 suppress. */
   genreBoosts: Record<string, number>; // { "rock": 1.5, "pop": 0.7 }
 
+  /** Artists the user wants to hear ("play Rammstein") — strongly surfaced if in
+   *  the catalogue. Per-turn directive: resets each turn unless named again. */
+  artists: string[];
+
+  /** Artists to find SIMILAR music to ("more like Rammstein") — ranking anchors on
+   *  their feature centroid. Per-turn directive. */
+  seedArtists: string[];
+
   /** Hard filters. */
   excludedArtists: string[];
   excludedGenres: string[];
@@ -126,6 +134,8 @@ and the backend deep-merges it into the context **the client sent in this reques
 
 - `featureTargets` / `genreBoosts` → field-level merge (new keys override, others kept)
 - `excludedArtists` / `excludedGenres` → set union (client clears by sending an empty `{}`)
+- `artists` → **per-turn directive**: applied only on the turn it's named and reset
+  otherwise, so "play Rammstein" then "something calm" doesn't leave Rammstein stuck on top
 - scalars (`activity`, `mainstream`, `baseAlgorithm`) → overwrite if present in patch
 
 This makes "vozim → ma ne, hoću nešto mirno" work correctly: the second message just
@@ -194,13 +204,40 @@ design is a **single chat completion with Structured Outputs** (`response_format
 One round trip, deterministic shape, easy to parse. `strict: true` guarantees the JSON
 matches the schema, so no defensive shape-checking is needed beyond value validation (§12).
 
-### 5.3 Future option: function calling (deferred)
+### 5.3 Tool calling + catalog-aware artist handling
 
-If you later want the assistant to **query live data** mid-conversation — e.g. "šta sam
-slušao juče?" or "ima li nešto novo od ovog izvođača?" — you can move to OpenAI **function
-calling** with tools like `search_songs` / `get_listening_history` and an execute-and-loop
-pattern. Not needed for the first version; noted so the module layout doesn't have to
-change later.
+The extraction runs as a **bounded tool-calling loop** (`LlmService.extract`, max
+`MAX_TOOL_ROUNDS` rounds + a forced final). The model has one tool:
+
+- **`search_catalog(query)`** — substring search over the catalogue by artist / title /
+  genre, returning the distinct artists, distinct genres, and a few sample songs found.
+  The executor lives in `AssistantService` (it has the DB); `LlmService` just drives the
+  loop. The model uses it to verify what exists and to pick **real** catalogue genres and
+  similar artists rather than guessing.
+
+This is the robustness layer: the model can ground its `genreBoosts` / `seedArtists` in
+what the library actually contains. Pure-vibe turns don't trigger a search (still one
+round trip); artist/genre-specific turns may add a round or two.
+
+**Similar-artists fallback (genre/feature based).** Two paths converge:
+
+1. **In-catalogue** "more like X" → the model puts X in `seedArtists`; the recommender
+   anchors the target vibe on **X's feature centroid** and returns similar *other* artists
+   (§8). This is the genre/feature engine.
+2. **Out-of-catalogue** artist → the model approximates that artist's sound with
+   `genreBoosts` + `featureTargets` (its world knowledge, grounded by `search_catalog` so
+   the genres it boosts actually exist), so the user still gets a fitting set.
+
+**Availability messaging stays deterministic.** Whatever the model returns, the backend
+re-resolves `artists` (and `seedArtists`) against the catalogue (`SELECT DISTINCT artist`),
+keeps the canonical spellings, drops the rest, and appends an availability note for any
+unknown *play*-requested artist (e.g. *"I couldn't find Rammstein in the library, so here's
+something with a similar vibe instead."*). The prompt instructs the model to always list a
+requested artist (even if it suspects it's absent) and **not** to assert availability
+itself — so the note is the single source of truth and never contradicts the reply. See §7.2.
+
+> Future option: add more tools (`get_listening_history`, etc.) for richer live queries —
+> the loop already supports it; just register the tool and handle it in `executeTool`.
 
 ### 5.4 System prompt (sketch)
 
@@ -281,11 +318,15 @@ sends `context: {}`.
 
 ```
 handleMessage(userId, text, context):              // context comes from the client
-  1. { assistant_reply, context_patch } = llm.extract(context, text)
-  2. merged = mergeVibeProfile(context, context_patch)
-  3. merged = validate(merged)                      // clamp/sanitize — see §12
+  1. { assistant_reply, context_patch } = llm.extract(context, text, executeTool)
+        - executeTool runs search_catalog against the DB when the model asks (§5.3)
+  2. merged = clampProfile(mergeVibeProfile(context, context_patch))   // §12
+  3. if merged.artists | merged.seedArtists: resolve against catalogue (SELECT DISTINCT artist)
+       - keep known (canonical spelling), strip unknown
+       - append "couldn't find <unknown>…" note for unknown play-requested artists
+         (unknown seed artists are dropped silently — the vibe fallback covers them)
   4. songs  = recommender.contextual(userId, merged)   // §8
-  5. return { reply: assistant_reply, context: merged, songs }
+  5. return { reply, context: merged, songs }
 ```
 
 Fully stateless: no DB reads/writes for the conversation; `userId` (from the JWT) is only
@@ -320,6 +361,7 @@ const RESPONSE_SCHEMA = {
           },
         },
         genreBoosts: { type: 'object', additionalProperties: { type: 'number' } },
+        artists: { type: 'array', items: { type: 'string' } },
         excludedArtists: { type: 'array', items: { type: 'string' } },
         excludedGenres: { type: 'array', items: { type: 'string' } },
         mainstream: { type: 'number' },
@@ -387,24 +429,31 @@ GET /recommend/contextual?user_id=...   (body: VibeProfile)
 Algorithm:
 
 1. **Build the target vector** from `featureTargets`. For any field the user didn't set,
-   fall back to the user's content-based profile (mean of liked songs' features) so the
-   result is still personalized. This is the natural blend of "vibe" + "taste".
+   fall back (in priority order) to the **seed-artist centroid** (mean features of
+   `seedArtists`' songs — this powers "more like X"), then the user's content-based profile
+   (mean of liked songs' features), then the catalogue median. A natural blend of explicit
+   vibe + "sounds like this artist" + personal taste.
+   - When `seedArtists` is set, those artists' own songs are excluded from the results, so
+     "more like X" returns *similar other* artists rather than X itself.
 2. **Candidate filtering** — drop songs whose `artist ∈ excludedArtists` or
    `genre ∈ excludedGenres`.
-3. **Similarity** — cosine similarity between the target vector and each candidate's
-   `[energy, valence, danceability, tempo_normalized]` (reuse the existing
-   content-based similarity code).
+3. **Proximity** — score each candidate by closeness to the target in the
+   min-max-scaled `[tempo, energy, danceability, valence]` space:
+   `score = 1 / (1 + euclidean_distance)` (so all four features weigh equally).
 4. **Genre boosts** — multiply each candidate's score by `genreBoosts[genre] ?? 1`.
-5. **Mainstream skew** — blend in a popularity term weighted by `mainstream`:
-   `score = sim_score + mainstream * w * normalized_popularity`
+5. **Artist boost** — multiply by a large factor (`ARTIST_BOOST`) for songs whose
+   `artist ∈ artists`, so explicitly-requested artists ("play Rammstein") rise to the
+   top when present in the catalogue.
+6. **Mainstream skew** — blend in a popularity term weighted by `mainstream`:
+   `score = score + mainstream * w * normalized_popularity`
    (negative `mainstream` subtracts popularity → favors deep cuts).
-6. **Exclude already-seen** songs (same as existing recommenders), return top-N.
+7. **Exclude already-seen** songs (same as existing recommenders), return top-N.
 
 `baseAlgorithm` selects which engine provides the candidate pool / fallback profile
 (`content` is the default and the most natural fit for vibe matching).
 
-> This is a thin layer over the existing content-based recommender — most of steps 3 and 6
-> already exist. Steps 1, 2, 4, 5 are the new contextual logic.
+> This is a thin layer over the existing content-based recommender — the feature matrix
+> and seen-filtering already exist. Steps 1, 2, 4, 5, 6 are the new contextual logic.
 
 ---
 
