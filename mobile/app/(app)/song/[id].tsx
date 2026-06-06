@@ -248,7 +248,10 @@ export default function SongDetail() {
             </Text>
           </View>
 
-          <View className="mt-6 flex-row items-center justify-center" style={{ gap: 24 }}>
+          <View
+            className="mt-6 flex-row items-center justify-center"
+            style={{ gap: 24 }}
+          >
             <Pressable
               onPress={() => prevId && navigateTo(prevId)}
               disabled={!prevId}
@@ -266,9 +269,7 @@ export default function SongDetail() {
               onPress={togglePlayback}
               disabled={!source}
               className={`h-20 w-20 items-center justify-center rounded-full ${
-                source
-                  ? 'bg-brand-400 active:bg-brand-500'
-                  : 'bg-white/10'
+                source ? 'bg-brand-400 active:bg-brand-500' : 'bg-white/10'
               }`}
             >
               <Ionicons

@@ -17,10 +17,9 @@ export function useToggleSave() {
   return useMutation<void, Error, ToggleSaveVars, ToggleContext>({
     mutationFn: async ({ songId, isSaved }) => {
       if (isSaved) {
-        await apiFetch(
-          `/interactions?songId=${songId}&eventType=save`,
-          { method: 'DELETE' },
-        );
+        await apiFetch(`/interactions?songId=${songId}&eventType=save`, {
+          method: 'DELETE',
+        });
       } else {
         await apiFetch('/interactions', {
           method: 'POST',
@@ -30,7 +29,8 @@ export function useToggleSave() {
     },
     onMutate: async ({ songId, isSaved }) => {
       await queryClient.cancelQueries({ queryKey: favoriteIdsQueryKey });
-      const previous = queryClient.getQueryData<Set<string>>(favoriteIdsQueryKey);
+      const previous =
+        queryClient.getQueryData<Set<string>>(favoriteIdsQueryKey);
 
       queryClient.setQueryData<Set<string>>(favoriteIdsQueryKey, (old) => {
         const next = new Set(old ?? []);

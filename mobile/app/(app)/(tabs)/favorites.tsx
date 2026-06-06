@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -35,8 +35,10 @@ export default function Favorites() {
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
 
-  const songs: SongWithTimestamp[] =
-    data?.pages.flatMap((page) => page.data) ?? [];
+  const songs: SongWithTimestamp[] = useMemo(
+    () => data?.pages.flatMap((page) => page.data) ?? [],
+    [data],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: SongWithTimestamp }) => {

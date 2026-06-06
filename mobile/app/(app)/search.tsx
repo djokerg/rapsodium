@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -43,8 +43,10 @@ export default function Search() {
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
 
-  const songs: SongSummary[] =
-    data?.pages.flatMap((page) => page.data) ?? [];
+  const songs: SongSummary[] = useMemo(
+    () => data?.pages.flatMap((page) => page.data) ?? [],
+    [data],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: SongSummary }) => {
@@ -61,7 +63,7 @@ export default function Search() {
         />
       );
     },
-    [favoriteIds, toggleSave, setQueue, router],
+    [favoriteIds, toggleSave, setQueue, router, songs],
   );
 
   const onEndReached = useCallback((): void => {
@@ -115,7 +117,11 @@ export default function Search() {
 
         {!hasQuery ? (
           <View className="flex-1 items-center justify-center px-8">
-            <Ionicons name="musical-notes-outline" size={40} color="#67e8f966" />
+            <Ionicons
+              name="musical-notes-outline"
+              size={40}
+              color="#67e8f966"
+            />
             <Text className="mt-4 text-center text-base text-brand-100/70">
               Start typing to find songs, artists, or genres.
             </Text>

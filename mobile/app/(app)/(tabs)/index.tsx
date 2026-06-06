@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -17,10 +17,7 @@ import {
 } from '@/components/AlgorithmPicker';
 import { SongRow } from '@/components/SongRow';
 import { useFavoriteIds } from '@/hooks/useFavoriteIds';
-import {
-  useRecommendations,
-  type Algorithm,
-} from '@/hooks/useRecommendations';
+import { useRecommendations, type Algorithm } from '@/hooks/useRecommendations';
 import { useToggleSave } from '@/hooks/useToggleSave';
 import { useAuthStore } from '@/stores/auth.store';
 import { usePlayerStore } from '@/stores/player.store';
@@ -62,7 +59,7 @@ export default function Home() {
   const { data: favoriteIds } = useFavoriteIds();
   const toggleSave = useToggleSave();
 
-  const songs: SongSummary[] = data?.data ?? [];
+  const songs: SongSummary[] = useMemo(() => data?.data ?? [], [data]);
 
   const renderItem = useCallback(
     ({ item }: { item: SongSummary }) => {
@@ -169,10 +166,7 @@ export default function Home() {
           </View>
         </View>
 
-        <Text
-          numberOfLines={1}
-          className="px-4 pb-2 text-xs text-brand-100/60"
-        >
+        <Text numberOfLines={1} className="px-4 pb-2 text-xs text-brand-100/60">
           {TAGLINES[algorithm]}
         </Text>
 

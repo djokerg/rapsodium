@@ -71,7 +71,11 @@ export default function Login() {
         <Text className="text-center text-sm text-rose-300">{error}</Text>
       ) : null}
 
-      <PrimaryButton label="Log in" onPress={handleSubmit} loading={submitting} />
+      <PrimaryButton
+        label="Log in"
+        onPress={handleSubmit}
+        loading={submitting}
+      />
 
       <View className="mt-2 flex-row justify-center">
         <Text className="text-brand-100/70">No account yet? </Text>

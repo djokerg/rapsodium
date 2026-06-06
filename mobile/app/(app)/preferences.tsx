@@ -1,7 +1,13 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GenreGrid } from '@/components/GenreGrid';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -111,7 +117,7 @@ export default function Preferences() {
                 Your genres
               </Text>
               <Text className="mt-2 text-base text-brand-100/70">
-                Update what you're into. At least {MIN_GENRES} required.
+                Update what you&apos;re into. At least {MIN_GENRES} required.
               </Text>
 
               <View className="mt-8">

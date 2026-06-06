@@ -19,7 +19,13 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function SongRowInner({ song, isSaved, onToggleSave, onPress, meta }: SongRowProps) {
+function SongRowInner({
+  song,
+  isSaved,
+  onToggleSave,
+  onPress,
+  meta,
+}: SongRowProps) {
   const router = useRouter();
 
   const handlePress = (): void => {
