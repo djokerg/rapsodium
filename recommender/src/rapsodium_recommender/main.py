@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from .algorithms import (
     CollaborativeRecommender,
     ContentBasedRecommender,
+    ContextualRecommender,
     PopularityRecommender,
 )
 from .config import get_settings
@@ -11,6 +12,8 @@ from .db import get_connection
 from .schemas import (
     CollaborativeResponse,
     ContentResponse,
+    ContextualRequest,
+    ContextualResponse,
     HealthResponse,
     PersonalizedRequest,
     PopularityRequest,
@@ -103,6 +106,36 @@ def recommend_collaborative(request: PersonalizedRequest) -> CollaborativeRespon
         limit=request.limit,
     )
     return CollaborativeResponse(
+        recommendations=[Recommendation(song_id=item.song_id, score=item.score) for item in scored],
+    )
+
+
+@app.post("/recommend/contextual", response_model=ContextualResponse)
+def recommend_contextual(request: ContextualRequest) -> ContextualResponse:
+    """Vibe-driven recommendations from a conversational VibeProfile.
+
+    Ranks songs by closeness to a target audio-feature vibe, then applies genre
+    boosts, artist/genre exclusions and a popularity skew. Unspecified features
+    fall back to the user's taste profile (or the catalogue median for cold-start
+    users). See docs/assistant.md §8.
+    """
+    interactions = load_interactions_df()
+    songs = load_songs_df()
+    recommender = ContextualRecommender(songs=songs, interactions=interactions)
+
+    scored = recommender.recommend(
+        user_id=request.user_id,
+        feature_targets=request.feature_targets.model_dump(exclude_none=True),
+        genre_boosts=request.genre_boosts,
+        artists=request.artists,
+        seed_artists=request.seed_artists,
+        excluded_artists=request.excluded_artists,
+        excluded_genres=request.excluded_genres,
+        mainstream=request.mainstream,
+        base_algorithm=request.base_algorithm,
+        limit=request.limit,
+    )
+    return ContextualResponse(
         recommendations=[Recommendation(song_id=item.song_id, score=item.score) for item in scored],
     )
 
