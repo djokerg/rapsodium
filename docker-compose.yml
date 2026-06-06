@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rapsodium-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rapsodium
+    ports:
+      - "5432:5432"
+    volumes:
+      - rapsodium-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d rapsodium"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rapsodium-pgdata:
