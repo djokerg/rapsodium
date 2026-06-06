@@ -14,9 +14,8 @@ export const updatePreferencesSchema = z
   .array(genreSchema)
   .min(1, 'At least one genre is required')
   .max(10, 'At most 10 genres allowed')
-  .refine(
-    (genres) => new Set(genres).size === genres.length,
-    { message: 'Duplicate genres are not allowed' },
-  );
+  .refine((genres) => new Set(genres).size === genres.length, {
+    message: 'Duplicate genres are not allowed',
+  });
 
 export type UpdatePreferencesDto = z.infer<typeof updatePreferencesSchema>;

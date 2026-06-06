@@ -3,7 +3,11 @@ import { asc, eq, ilike, or, count } from 'drizzle-orm';
 import { DATABASE, type Database } from '../database/database.module.js';
 import { songs } from '../database/schema.js';
 import { DeezerService } from './deezer.service.js';
-import type { SongSummary, SongDetail, PaginatedResult } from './songs.types.js';
+import type {
+  SongSummary,
+  SongDetail,
+  PaginatedResult,
+} from './songs.types.js';
 
 export type { SongSummary, SongDetail, PaginatedResult };
 
@@ -28,7 +32,10 @@ export class SongsService {
     private readonly deezerService: DeezerService,
   ) {}
 
-  async list(page: number, limit: number): Promise<PaginatedResult<SongSummary>> {
+  async list(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<SongSummary>> {
     const offset = (page - 1) * limit;
 
     const [data, totalRows] = await Promise.all([
@@ -46,7 +53,11 @@ export class SongsService {
     return { data, meta: { page, limit, total } };
   }
 
-  async search(q: string, page: number, limit: number): Promise<PaginatedResult<SongSummary>> {
+  async search(
+    q: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResult<SongSummary>> {
     const offset = (page - 1) * limit;
     const pattern = `%${escapeLikePattern(q)}%`;
 
@@ -64,10 +75,7 @@ export class SongsService {
         .orderBy(asc(songs.title))
         .limit(limit)
         .offset(offset),
-      this.db
-        .select({ total: count() })
-        .from(songs)
-        .where(where),
+      this.db.select({ total: count() }).from(songs).where(where),
     ]);
 
     const total = totalRows[0]?.total ?? 0;
@@ -76,7 +84,7 @@ export class SongsService {
   }
 
   async getById(id: string): Promise<SongDetail> {
-    const [song] = await this.db
+    const rows = await this.db
       .select({
         ...summaryColumns,
         deezerId: songs.deezerId,
@@ -86,12 +94,13 @@ export class SongsService {
       .where(eq(songs.id, id))
       .limit(1);
 
-    if (!song) {
+    if (rows.length === 0) {
       throw new NotFoundException('Song not found');
     }
 
-    const { deezerId, previewUrl: storedPreviewUrl, ...rest } = song;
-    const freshPreviewUrl = await this.deezerService.getFreshPreviewUrl(deezerId);
+    const { deezerId, previewUrl: storedPreviewUrl, ...rest } = rows[0];
+    const freshPreviewUrl =
+      await this.deezerService.getFreshPreviewUrl(deezerId);
 
     return { ...rest, previewUrl: freshPreviewUrl ?? storedPreviewUrl };
   }

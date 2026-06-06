@@ -16,4 +16,6 @@ export const recommendationsQuerySchema = z.object({
     .default(20),
 });
 
-export type RecommendationsQueryDto = z.infer<typeof recommendationsQuerySchema>;
+export type RecommendationsQueryDto = z.infer<
+  typeof recommendationsQuerySchema
+>;

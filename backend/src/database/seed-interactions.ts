@@ -39,18 +39,48 @@ interface EventDraw {
   listenedSeconds: number | null;
 }
 
-const PREFERRED_DISTRIBUTION: Array<{ probability: number; draw: () => EventDraw }> = [
-  { probability: 0.2, draw: () => ({ eventType: 'save', listenedSeconds: null }) },
-  { probability: 0.4, draw: () => ({ eventType: 'play', listenedSeconds: randInt(25, 30) }) },
-  { probability: 0.25, draw: () => ({ eventType: 'play', listenedSeconds: randInt(8, 20) }) },
-  { probability: 0.15, draw: () => ({ eventType: 'skip', listenedSeconds: randInt(0, 7) }) },
+const PREFERRED_DISTRIBUTION: Array<{
+  probability: number;
+  draw: () => EventDraw;
+}> = [
+  {
+    probability: 0.2,
+    draw: () => ({ eventType: 'save', listenedSeconds: null }),
+  },
+  {
+    probability: 0.4,
+    draw: () => ({ eventType: 'play', listenedSeconds: randInt(25, 30) }),
+  },
+  {
+    probability: 0.25,
+    draw: () => ({ eventType: 'play', listenedSeconds: randInt(8, 20) }),
+  },
+  {
+    probability: 0.15,
+    draw: () => ({ eventType: 'skip', listenedSeconds: randInt(0, 7) }),
+  },
 ];
 
-const NON_PREFERRED_DISTRIBUTION: Array<{ probability: number; draw: () => EventDraw }> = [
-  { probability: 0.02, draw: () => ({ eventType: 'save', listenedSeconds: null }) },
-  { probability: 0.05, draw: () => ({ eventType: 'play', listenedSeconds: randInt(25, 30) }) },
-  { probability: 0.25, draw: () => ({ eventType: 'play', listenedSeconds: randInt(8, 20) }) },
-  { probability: 0.68, draw: () => ({ eventType: 'skip', listenedSeconds: randInt(0, 7) }) },
+const NON_PREFERRED_DISTRIBUTION: Array<{
+  probability: number;
+  draw: () => EventDraw;
+}> = [
+  {
+    probability: 0.02,
+    draw: () => ({ eventType: 'save', listenedSeconds: null }),
+  },
+  {
+    probability: 0.05,
+    draw: () => ({ eventType: 'play', listenedSeconds: randInt(25, 30) }),
+  },
+  {
+    probability: 0.25,
+    draw: () => ({ eventType: 'play', listenedSeconds: randInt(8, 20) }),
+  },
+  {
+    probability: 0.68,
+    draw: () => ({ eventType: 'skip', listenedSeconds: randInt(0, 7) }),
+  },
 ];
 
 function randInt(min: number, max: number): number {
@@ -113,7 +143,9 @@ async function main(): Promise<void> {
     songsByGenre.set(song.genre, list);
   }
 
-  console.log(`Catalog loaded: ${allSongs.length} songs across ${songsByGenre.size} genres`);
+  console.log(
+    `Catalog loaded: ${allSongs.length} songs across ${songsByGenre.size} genres`,
+  );
   console.log(`Hashing password ("${PASSWORD}") for ${NUM_USERS} users...`);
   const passwordHash = await bcrypt.hash(PASSWORD, BCRYPT_ROUNDS);
 
@@ -174,7 +206,10 @@ async function main(): Promise<void> {
     }
 
     const preferredPicks = sampleUnique(preferredSongPool, preferredCount);
-    const nonPreferredPicks = sampleUnique(nonPreferredSongPool, nonPreferredCount);
+    const nonPreferredPicks = sampleUnique(
+      nonPreferredSongPool,
+      nonPreferredCount,
+    );
 
     for (const songId of preferredPicks) {
       const draw = weightedPick(PREFERRED_DISTRIBUTION);
@@ -209,7 +244,11 @@ async function main(): Promise<void> {
       .insert(interactions)
       .values(interactionRows.slice(i, i + 500))
       .onConflictDoNothing({
-        target: [interactions.userId, interactions.songId, interactions.eventType],
+        target: [
+          interactions.userId,
+          interactions.songId,
+          interactions.eventType,
+        ],
         where: sql`event_type = 'save'`,
       });
   }
@@ -236,7 +275,9 @@ async function main(): Promise<void> {
   console.log(`    play:                     ${eventCounts.play}`);
   console.log(`    skip:                     ${eventCounts.skip}`);
   console.log(`    save:                     ${eventCounts.save}`);
-  console.log(`  Songs touched:              ${touchedSongIds.size} / ${allSongs.length} (${coverage.toFixed(1)}%)`);
+  console.log(
+    `  Songs touched:              ${touchedSongIds.size} / ${allSongs.length} (${coverage.toFixed(1)}%)`,
+  );
   console.log(`  Matrix density:             ${density.toFixed(2)}%`);
   console.log('');
   console.log('Login example:');

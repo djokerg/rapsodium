@@ -45,19 +45,22 @@ const songSummaryColumns = {
 export class InteractionsService {
   constructor(@Inject(DATABASE) private readonly db: Database) {}
 
-  async create(userId: string, dto: CreateInteractionDto): Promise<Interaction> {
-    const [song] = await this.db
+  async create(
+    userId: string,
+    dto: CreateInteractionDto,
+  ): Promise<Interaction> {
+    const songRows = await this.db
       .select({ id: songs.id })
       .from(songs)
       .where(eq(songs.id, dto.songId))
       .limit(1);
 
-    if (!song) {
+    if (songRows.length === 0) {
       throw new NotFoundException('Song not found');
     }
 
     if (isToggleEvent(dto.eventType)) {
-      const [existing] = await this.db
+      const existingRows = await this.db
         .select()
         .from(interactions)
         .where(
@@ -69,8 +72,8 @@ export class InteractionsService {
         )
         .limit(1);
 
-      if (existing) {
-        return rowToInteraction(existing);
+      if (existingRows.length > 0) {
+        return rowToInteraction(existingRows[0]);
       }
     }
 

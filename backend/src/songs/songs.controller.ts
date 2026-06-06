@@ -10,7 +10,11 @@ import {
   type SongIdDto,
 } from './songs.schemas.js';
 import { SongsService } from './songs.service.js';
-import type { SongSummary, SongDetail, PaginatedResult } from './songs.types.js';
+import type {
+  SongSummary,
+  SongDetail,
+  PaginatedResult,
+} from './songs.types.js';
 
 @Controller('songs')
 @UseGuards(AuthGuard)

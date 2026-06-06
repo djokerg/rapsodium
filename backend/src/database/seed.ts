@@ -94,7 +94,11 @@ async function fetchAllSongs(): Promise<SeedSong[]> {
 
   for (const [genre, genreId] of genreEntries) {
     console.log(`Fetching top "${genre}" tracks...`);
-    const tracks = await fetchTopTracksForGenre(genre, genreId, TRACKS_PER_GENRE);
+    const tracks = await fetchTopTracksForGenre(
+      genre,
+      genreId,
+      TRACKS_PER_GENRE,
+    );
 
     for (const track of tracks) {
       if (!seenIds.has(track.deezerId)) {

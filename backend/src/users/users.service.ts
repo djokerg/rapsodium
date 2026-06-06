@@ -1,8 +1,8 @@
-import {Inject, Injectable, NotFoundException} from '@nestjs/common';
-import {eq} from 'drizzle-orm';
-import {DATABASE, type Database} from '../database/database.module.js';
-import {userPreferences, users} from '../database/schema.js';
-import type {UpdatePreferencesDto} from './users.schemas.js';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+import { DATABASE, type Database } from '../database/database.module.js';
+import { userPreferences, users } from '../database/schema.js';
+import type { UpdatePreferencesDto } from './users.schemas.js';
 
 export interface Preference {
   genre: string;
@@ -49,13 +49,13 @@ export class UsersService {
     preferences: UpdatePreferencesDto,
   ): Promise<Preference[]> {
     return this.db.transaction(async (tx) => {
-      const [user] = await tx
+      const userRows = await tx
         .select({ id: users.id })
         .from(users)
         .where(eq(users.id, userId))
         .limit(1);
 
-      if (!user) {
+      if (userRows.length === 0) {
         throw new NotFoundException('User not found');
       }
 
@@ -64,16 +64,16 @@ export class UsersService {
         .where(eq(userPreferences.userId, userId));
 
       return tx
-          .insert(userPreferences)
-          .values(
-              preferences.map((genre) => ({
-                  userId,
-                  genre,
-              })),
-          )
-          .returning({
-              genre: userPreferences.genre,
-          });
+        .insert(userPreferences)
+        .values(
+          preferences.map((genre) => ({
+            userId,
+            genre,
+          })),
+        )
+        .returning({
+          genre: userPreferences.genre,
+        });
     });
   }
 }

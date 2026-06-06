@@ -15,7 +15,9 @@ export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const userPreferences = pgTable(
@@ -29,7 +31,10 @@ export const userPreferences = pgTable(
     weight: real('weight').notNull().default(1.0),
   },
   (table) => [
-    uniqueIndex('user_preferences_user_genre_idx').on(table.userId, table.genre),
+    uniqueIndex('user_preferences_user_genre_idx').on(
+      table.userId,
+      table.genre,
+    ),
   ],
 );
 
@@ -66,7 +71,9 @@ export const interactions = pgTable(
       .references(() => songs.id, { onDelete: 'cascade' }),
     eventType: varchar('event_type', { length: 20 }).notNull(),
     listenedSeconds: integer('listened_seconds'),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     uniqueIndex('interactions_toggle_unique_idx')

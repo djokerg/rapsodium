@@ -6,7 +6,9 @@ export type EventType = (typeof EVENT_TYPES)[number];
 export const TOGGLE_EVENT_TYPES = ['save'] as const;
 export type ToggleEventType = (typeof TOGGLE_EVENT_TYPES)[number];
 
-export function isToggleEvent(eventType: EventType): eventType is ToggleEventType {
+export function isToggleEvent(
+  eventType: EventType,
+): eventType is ToggleEventType {
   return (TOGGLE_EVENT_TYPES as readonly EventType[]).includes(eventType);
 }
 
