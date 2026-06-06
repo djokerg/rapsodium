@@ -27,6 +27,9 @@ The application includes the following features:
 - Favorites
 - Listening history
 - Recommendations screen
+- Conversational assistant — natural-language vibe/activity input that adapts
+  recommendations in real time and lets the user fine-tune the algorithm
+  (see [assistant.md](./assistant.md))
 
 ### 2. Backend
 
@@ -75,6 +78,7 @@ The system uses a dataset of approximately 500 songs with metadata required for 
 | Mobile | React Native, Expo, Expo Router, Expo Audio, TanStack Query, Zustand |
 | Backend | NestJS, PostgreSQL, Drizzle ORM, JWT auth |
 | Recommender | Python, pandas, scikit-learn, numpy |
+| Assistant | OpenAI API (`openai` SDK), structured outputs |
 | Dev / Deploy | GitHub |
 
 ---

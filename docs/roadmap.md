@@ -92,17 +92,33 @@ Evaluate and compare the recommendation algorithms.
 
 ---
 
-## Phase 8 — Optional Extensions
+## Phase 8 — Conversational Assistant
 
-Only pursue if the core scope (Phases 1-7) is stable and complete.
+Add a chat-based control layer over the recommendation engine: the user describes what
+they're doing or the vibe they want (in natural language), and recommendations adapt in
+real time; the same chat lets the user fine-tune the algorithm (boost a genre, exclude an
+artist, push toward less mainstream). See [assistant.md](./assistant.md) for the detailed design.
+
+- [ ] Backend `assistant` module — stateless `POST /assistant/message` (no DB tables)
+- [ ] OpenAI integration (`openai` SDK, structured output) — NL → `VibeProfile` patch
+- [ ] `mergeVibeProfile` patch-merge logic + `validate` (clamp/sanitize) + unit tests
+- [ ] Recommender `contextual` endpoint (vibe ⊕ taste, filters, genre boosts, mainstream skew)
+- [ ] Mobile chat screen — in-memory VibeProfile, live recommendation strip + filter chips
+
+---
+
+## Phase 9 — Optional Extensions
+
+Only pursue if the core scope is stable and complete.
 
 - [ ] Hybrid recommender (combine multiple approaches)
 - [ ] "Why this recommendation" explanations
+- [ ] Assistant tool-use (query history/catalog mid-conversation)
 - [ ] UI/UX polish and refinements
 
 ---
 
-## Phase 9 — Master's Thesis
+## Phase 10 — Master's Thesis
 
 Write the thesis document based on the implemented system. The theoretical chapters (introduction, background) can be started alongside implementation phases.
 
