@@ -8,5 +8,6 @@ import { RecommenderClient } from './recommender.client.js';
   imports: [AuthModule],
   controllers: [RecommendationsController],
   providers: [RecommendationsService, RecommenderClient],
+  exports: [RecommenderClient],
 })
 export class RecommendationsModule {}

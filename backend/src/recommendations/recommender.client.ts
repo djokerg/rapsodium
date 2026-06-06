@@ -4,6 +4,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { VibeProfile } from '../assistant/types.js';
 
 export interface ScoredSong {
   readonly songId: string;
@@ -19,6 +20,12 @@ export interface PopularityParams {
 export interface PersonalizedParams {
   readonly userId: string;
   readonly genres?: readonly string[];
+  readonly limit: number;
+}
+
+export interface ContextualParams {
+  readonly userId: string;
+  readonly profile: VibeProfile;
   readonly limit: number;
 }
 
@@ -66,10 +73,24 @@ export class RecommenderClient {
     });
   }
 
-  private async call(
-    path: string,
-    payload: unknown,
-  ): Promise<ScoredSong[]> {
+  /** Vibe-driven recommendations from a conversational VibeProfile. */
+  contextual(params: ContextualParams): Promise<ScoredSong[]> {
+    const p = params.profile;
+    return this.call('/recommend/contextual', {
+      user_id: params.userId,
+      feature_targets: p.featureTargets,
+      genre_boosts: p.genreBoosts,
+      artists: p.artists,
+      seed_artists: p.seedArtists,
+      excluded_artists: p.excludedArtists,
+      excluded_genres: p.excludedGenres,
+      mainstream: p.mainstream,
+      base_algorithm: p.baseAlgorithm,
+      limit: params.limit,
+    });
+  }
+
+  private async call(path: string, payload: unknown): Promise<ScoredSong[]> {
     const body = await this.post<RecommendResponseBody>(path, payload);
     return body.recommendations.map((item) => ({
       songId: item.song_id,

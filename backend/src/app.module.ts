@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module.js';
 import { SongsModule } from './songs/songs.module.js';
 import { InteractionsModule } from './interactions/interactions.module.js';
 import { RecommendationsModule } from './recommendations/recommendations.module.js';
+import { AssistantModule } from './assistant/assistant.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RecommendationsModule } from './recommendations/recommendations.module.
     SongsModule,
     InteractionsModule,
     RecommendationsModule,
+    AssistantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
