@@ -24,10 +24,12 @@ essentia = { version = "*", allow-prereleases = true }
 ruff = "^0.7"
 mypy = "^1.13"
 pytest = "^8.3"
+matplotlib = "^3.11.0"
 
 [tool.poetry.scripts]
 dev = "rapsodium_recommender.main:run_dev"
 leaderboard = "rapsodium_recommender.scripts.leaderboard:main"
+evaluate = "rapsodium_recommender.scripts.evaluate:main"
 seed-audio-features = "rapsodium_recommender.scripts.seed_audio_features:main"
 extract-audio-features = "rapsodium_recommender.scripts.extract_audio_features:main"
 
@@ -69,7 +71,7 @@ warn_unused_ignores = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["sklearn.*", "pandas.*", "essentia.*"]
+module = ["sklearn.*", "pandas.*", "essentia.*", "matplotlib.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
