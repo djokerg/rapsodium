@@ -45,6 +45,7 @@ Rapsodium is a three-tier system consisting of a mobile client, a backend API, a
 app/
 ├── _layout.tsx              # Root layout (Stack navigator)
 ├── index.tsx                # Home / recommendations feed
+├── assistant.tsx            # Muse — conversational assistant (vibe chat)
 ├── (auth)/
 │   ├── login.tsx
 │   └── register.tsx
@@ -108,6 +109,13 @@ src/
 │   ├── recommendations.module.ts
 │   ├── recommendations.controller.ts  # GET /recommendations
 │   └── recommendations.service.ts     # Calls Python recommender, returns results
+├── assistant/
+│   ├── assistant.module.ts
+│   ├── assistant.controller.ts        # POST /assistant/message
+│   ├── assistant.service.ts           # Orchestrates LLM + recommender (stateless)
+│   ├── llm.service.ts                 # OpenAI structured output + tool calling
+│   ├── vibe-merge.ts                  # Patch-merge/clamp the VibeProfile
+│   └── types.ts                       # VibeProfile, message contracts
 ├── insights/
 │   ├── insights.module.ts
 │   ├── insights.controller.ts         # GET /insights
@@ -183,6 +191,19 @@ Recommends songs that similar users have enjoyed.
 - **Method:** User-based or item-based collaborative filtering using cosine similarity on the interaction matrix
 - **Output:** Top-N songs from similar users that the current user hasn't seen
 - **Personalization:** High (based on community behavior)
+
+#### 4. Contextual ("Vibe")
+
+Powers the conversational assistant (see [assistant.md](./assistant.md)). Ranks songs by
+closeness to an explicit **target vibe** derived from natural-language chat, rather than to the
+user's past saves.
+
+- **Input:** A `VibeProfile` (feature targets, genre boosts, requested/seed artists, exclusions,
+  mainstream skew) produced by the backend assistant from the user's message
+- **Method:** Proximity in min-max-scaled audio-feature space, then genre boosts, artist/genre
+  filters, and a popularity skew; cold-start features fall back to the user's taste profile
+- **Output:** Top-N songs matching the requested context, exposed via `POST /recommend/contextual`
+- **Personalization:** High (per-message, real-time)
 
 ### Integration with Backend
 

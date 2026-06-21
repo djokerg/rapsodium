@@ -79,20 +79,7 @@ Implement the three recommendation algorithms in Python.
 
 ---
 
-## Phase 7 — Evaluation
-
-Evaluate and compare the recommendation algorithms.
-
-- [ ] Implement train/test split on interaction data
-- [ ] Calculate Precision@10 for each algorithm
-- [ ] Calculate Recall@10 for each algorithm
-- [ ] Calculate Hit Rate@10 for each algorithm
-- [ ] Generate comparison charts and result tables
-- [ ] Document findings and analysis
-
----
-
-## Phase 8 — Conversational Assistant
+## Phase 7 — Conversational Assistant
 
 Add a chat-based control layer over the recommendation engine: the user describes what
 they're doing or the vibe they want (in natural language), and recommendations adapt in
@@ -107,7 +94,7 @@ artist, push toward less mainstream). See [assistant.md](./assistant.md) for the
 
 ---
 
-## Phase 9 — Listening Insights
+## Phase 8 — Listening Insights
 
 Give the user an overview of their listening over time: most-played artists and songs,
 when and how they listen, and how their taste is shifting. All stats are **derived from the
@@ -124,18 +111,21 @@ existing `interactions` table** via aggregation queries — no new tables, consi
 
 ---
 
-## Phase 10 — Optional Extensions
+## Phase 9 — Evaluation
 
-Only pursue if the core scope is stable and complete.
+Evaluate and compare the recommendation algorithms. Run this **in parallel with (or before)
+writing the thesis** — these results feed directly into the thesis's experiments chapter.
 
-- [ ] Hybrid recommender (combine multiple approaches)
-- [ ] "Why this recommendation" explanations
-- [ ] Assistant tool-use (query history/catalog mid-conversation)
-- [ ] UI/UX polish and refinements
+- [ ] Implement train/test split on interaction data
+- [ ] Calculate Precision@10 for each algorithm
+- [ ] Calculate Recall@10 for each algorithm
+- [ ] Calculate Hit Rate@10 for each algorithm
+- [ ] Generate comparison charts and result tables
+- [ ] Document findings and analysis
 
 ---
 
-## Phase 11 — Master's Thesis
+## Phase 10 — Master's Thesis
 
 Write the thesis document based on the implemented system. The theoretical chapters (introduction, background) can be started alongside implementation phases.
 
