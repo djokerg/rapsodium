@@ -115,13 +115,15 @@ existing `interactions` table** via aggregation queries — no new tables, consi
 
 Evaluate and compare the recommendation algorithms. Run this **in parallel with (or before)
 writing the thesis** — these results feed directly into the thesis's experiments chapter.
+Harness lives in the recommender (`evaluation/` + `poetry run evaluate`); see
+[evaluation.md](./evaluation.md).
 
-- [ ] Implement train/test split on interaction data
-- [ ] Calculate Precision@10 for each algorithm
-- [ ] Calculate Recall@10 for each algorithm
-- [ ] Calculate Hit Rate@10 for each algorithm
-- [ ] Generate comparison charts and result tables
-- [ ] Document findings and analysis
+- [x] Implement train/test split on interaction data (leave-one-out, one positive per user)
+- [x] Calculate Precision@10 for each algorithm
+- [x] Calculate Recall@10 for each algorithm
+- [x] Calculate Hit Rate@10 for each algorithm
+- [x] Generate comparison charts and result tables (`--csv`, `--chart`)
+- [x] Run on the full dataset and document findings and analysis (see [evaluation.md](./evaluation.md))
 
 ---
 
