@@ -9,6 +9,7 @@ import { SongsModule } from './songs/songs.module.js';
 import { InteractionsModule } from './interactions/interactions.module.js';
 import { RecommendationsModule } from './recommendations/recommendations.module.js';
 import { AssistantModule } from './assistant/assistant.module.js';
+import { InsightsModule } from './insights/insights.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AssistantModule } from './assistant/assistant.module.js';
     InteractionsModule,
     RecommendationsModule,
     AssistantModule,
+    InsightsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
