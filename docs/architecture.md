@@ -52,7 +52,8 @@ app/
 ├── search.tsx               # Song search
 ├── song/[id].tsx            # Song detail + audio player
 ├── favorites.tsx            # Saved songs
-└── history.tsx              # Listening history
+├── history.tsx              # Listening history
+└── insights.tsx             # Listening insights / stats overview
 ```
 
 ### State Management
@@ -107,6 +108,11 @@ src/
 │   ├── recommendations.module.ts
 │   ├── recommendations.controller.ts  # GET /recommendations
 │   └── recommendations.service.ts     # Calls Python recommender, returns results
+├── insights/
+│   ├── insights.module.ts
+│   ├── insights.controller.ts         # GET /insights
+│   ├── insights.service.ts            # Aggregates interactions into listening stats
+│   └── insights.util.ts               # Pure helpers (bucket filling, taste shift)
 └── database/
     ├── database.module.ts   # Drizzle connection setup
     └── schema.ts            # Drizzle table definitions
@@ -133,6 +139,8 @@ src/
 | `GET` | `/interactions/favorites` | Yes | Get user's saved songs |
 | `GET` | `/interactions/history` | Yes | Get user's listening history |
 | `GET` | `/recommendations` | Yes | Get personalized recommendations |
+| `POST` | `/assistant/message` | Yes | Conversational vibe/algorithm tuning (stateless) |
+| `GET` | `/insights` | Yes | Listening insights over a time window (aggregated from interactions) |
 
 ---
 

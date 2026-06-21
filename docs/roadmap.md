@@ -107,7 +107,24 @@ artist, push toward less mainstream). See [assistant.md](./assistant.md) for the
 
 ---
 
-## Phase 9 — Optional Extensions
+## Phase 9 — Listening Insights
+
+Give the user an overview of their listening over time: most-played artists and songs,
+when and how they listen, and how their taste is shifting. All stats are **derived from the
+existing `interactions` table** via aggregation queries — no new tables, consistent with the
+"favorites and history are derived, not stored" design decision. See
+[insights.md](./insights.md) for the detailed design.
+
+- [x] Backend `insights` module — `GET /insights?days=` (aggregations over `interactions`)
+- [x] Headline totals (plays, unique songs/artists, saves, listening minutes)
+- [x] Top artists, top songs, top genres (with share of plays)
+- [x] Listening patterns — plays bucketed by hour of day and day of week
+- [x] Taste shift — rising/falling genres (recent vs. previous half of the window) + unit tests
+- [x] Mobile Insights tab — range selector, stat cards, bar charts, taste-shift list
+
+---
+
+## Phase 10 — Optional Extensions
 
 Only pursue if the core scope is stable and complete.
 
@@ -118,7 +135,7 @@ Only pursue if the core scope is stable and complete.
 
 ---
 
-## Phase 10 — Master's Thesis
+## Phase 11 — Master's Thesis
 
 Write the thesis document based on the implemented system. The theoretical chapters (introduction, background) can be started alongside implementation phases.
 
